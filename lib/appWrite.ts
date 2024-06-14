@@ -7,7 +7,8 @@ export const config = {
     databaseId: "666abf190015a08ab38c",
     userCollectionId: "666abf320024035e6682",
     videCollectionId: "666abf630013566ab484",
-    storageId: "666ac0a100083240281e"
+    storageId: "666ac0a100083240281e",
+    likesCollectionId: "666bd6f1000b51feb223"
 }
 
 const {
@@ -17,7 +18,8 @@ const {
     databaseId,
     userCollectionId,
     videCollectionId,
-    storageId
+    storageId,
+    likesCollectionId,
 } = config
 
 // Init your React Native SDK
@@ -68,6 +70,7 @@ export const createUser = async (email: string, password: string, username: stri
     }
 }
 
+// Fungsi login
 export async function signIn(email: string, password: string) {
     try {
         const session = await account.createEmailPasswordSession(email, password)
@@ -88,6 +91,7 @@ export const signOut = async () => {
     }
 }
 
+// Fetch user sekarang
 export const getCurrentUser = async () => {
     try {
         const currentAccount = await account.get()
@@ -108,6 +112,7 @@ export const getCurrentUser = async () => {
     }
 }
 
+// Fetch semua post
 export const getAllPost = async () => {
     try {
         const posts = await databases.listDocuments(
@@ -122,6 +127,7 @@ export const getAllPost = async () => {
     }
 }
 
+// Fetch post yang baru saja di upload
 export const getLatestPost = async () => {
     try {
         const posts = await databases.listDocuments(
@@ -136,6 +142,7 @@ export const getLatestPost = async () => {
     }
 }
 
+// Cari post
 export const searchPosts = async (query: string) => {
     try {
         const posts = await databases.listDocuments(
@@ -150,6 +157,7 @@ export const searchPosts = async (query: string) => {
     }
 }
 
+// Fetch post user  yang sekarang
 export const getUserPosts = async (userId: any) => {
     try {
         const posts = await databases.listDocuments(
@@ -210,6 +218,7 @@ export const uploadFile = async (file: any, type: string) => {
     }
 }
 
+// Buat post
 export const createVideo = async (form: any) => {
     try {
         const [thumbnailUrl, videoUrl] = await Promise.all([
@@ -233,5 +242,85 @@ export const createVideo = async (form: any) => {
         return newPost
     } catch (error: any) {
         throw new Error(error)
+    }
+}
+
+export const likeVideo = async (videoId: string, userId: string) => {
+    try {
+        const id = ID.unique();
+        const response = await databases.createDocument(
+            databaseId,
+            likesCollectionId,
+            id,
+            {
+                id,
+                videoId,
+                userId,
+                createdAt: new Date().toISOString()
+            }
+        )
+
+        console.log(response)
+        return response
+    } catch (error: any) {
+        console.error("Error like video", error)
+    }
+}
+
+export const unlikeVideo = async (videoId: string, userId: string) => {
+    try {
+        const query = Query.and(
+            [Query.equal("videoId", videoId),
+            Query.equal("userId", userId)]
+        );
+
+        const response = await databases.listDocuments(
+            databaseId,
+            likesCollectionId,
+            [query]
+        );
+
+        if (response.documents.length > 0) {
+            const documentId = response.documents[0].$id;
+            await databases.deleteDocument(
+                databaseId,
+                likesCollectionId,
+                documentId
+            );
+        }
+
+        return response
+    } catch (error: any) {
+        console.error("Error unlike video", error)
+    }
+}
+
+export const getVideoLikes = async (videoId: string) => {
+    try {
+        const response = await databases.listDocuments(
+            databaseId,
+            likesCollectionId,
+            [Query.equal("videoId", videoId)]
+        )
+
+        return response.documents.length
+    } catch (error: any) {
+        console.log(error)
+        return 0
+    }
+}
+
+export const checkIfLiked = async (videoId: string, userId: string) => {
+    try {
+        const response = await databases.listDocuments(
+            databaseId,
+            likesCollectionId,
+            [Query.and([Query.equal("videoId", videoId), Query.equal("userId", userId)])]
+        )
+
+        return response.documents.length > 0
+    } catch (error) {
+        console.error(error)
+        return false
     }
 }

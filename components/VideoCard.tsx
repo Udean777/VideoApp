@@ -1,10 +1,34 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { icons, images } from '../constants'
 import { ResizeMode, Video } from 'expo-av'
+import { checkIfLiked, getVideoLikes, likeVideo, unlikeVideo } from '../lib/appWrite'
+import { useGlobalContext } from '../context/GlobalProvider'
 
-const VideoCard = ({ video: { title, thumbnail, video, creator: { username, avatar } } }: any) => {
+const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, avatar } }, post }: any) => {
     const [play, setPlay] = useState(false)
+    const [liked, setLiked] = useState(false)
+    const { user } = useGlobalContext()
+    const [likes, setLikes] = useState(0);
+
+    const handleLike = async () => {
+        if (liked) {
+            await unlikeVideo(post.$id, user.$id)
+            setLiked(false);
+        } else {
+            await likeVideo(post.$id, user.$id)
+            setLiked(true);
+        }
+
+    }
+
+    useEffect(() => {
+        getVideoLikes(post.$id).then((likes) => setLikes(likes));
+
+        checkIfLiked(post.$id, user.$id).then((isLiked) => setLiked(isLiked))
+    }, [post.$id, user.$id]);
+
+    // console.log(likesCount)
 
     return (
         <View className='flex-col items-center px-4 mb-14'>
@@ -65,7 +89,29 @@ const VideoCard = ({ video: { title, thumbnail, video, creator: { username, avat
                     className='w-12 h-12 absolute'
                     resizeMode='contain'
                 />
-            </TouchableOpacity>}
+            </TouchableOpacity>
+            }
+
+            <View style={{
+                flexDirection: "row",
+                alignSelf: "flex-start",
+                alignItems: "center",
+                gap: 10
+            }}>
+                <TouchableOpacity
+                    activeOpacity={0.7}
+                    className='pt-2'
+                    onPress={handleLike}
+                >
+                    <Image
+                        source={liked ? icons.liked : icons.like}
+                        className='w-10 h-10'
+                        resizeMode='contain'
+                        tintColor={"#fff"}
+                    />
+                </TouchableOpacity>
+                <Text className='text-white font-psemibold text-lg'>{likes || 0} likes</Text>
+            </View>
         </View>
     )
 }

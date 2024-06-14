@@ -62,6 +62,7 @@ const Create = () => {
                 thumbnail: null,
                 prompt: ""
             })
+            setUploading(false)
         }
     }
 
@@ -135,7 +136,7 @@ const Create = () => {
                 <FormField
                     title='AI Prompt'
                     value={form.prompt}
-                    placeholder='The prompt you used to create this video'
+                    placeholder='The prompt you use to create this video'
                     handleChangeText={(e) => setForm({ ...form, prompt: e })}
                     otherStyles={"mt-7"}
                 />

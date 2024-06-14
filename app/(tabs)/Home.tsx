@@ -14,8 +14,8 @@ import { useGlobalContext } from '../../context/GlobalProvider'
 const Home = () => {
     const { user, setUser, setIsLoggedIn } = useGlobalContext()
     const [refreshing, setRefreshing] = useState(false)
-    const { data: posts, refetch } = useAppwrite(getAllPost)
     const { data: latestPosts } = useAppwrite(getLatestPost)
+    const { data: posts, refetch } = useAppwrite(getAllPost)
 
     // console.log(data)
 
@@ -33,7 +33,7 @@ const Home = () => {
                 data={posts}
                 keyExtractor={(item) => item.$id}
                 renderItem={({ item }) => (
-                    <VideoCard video={item} />
+                    <VideoCard video={item} post={item} />
                 )}
                 ListHeaderComponent={() => (
                     <View className='my-6 px-4 space-y-6'>
