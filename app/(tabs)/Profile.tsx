@@ -1,11 +1,11 @@
 import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native'
 import React from 'react'
-import { router, useLocalSearchParams } from 'expo-router'
+import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import EmptyState from '../../components/EmptyState'
 import { StatusBar } from 'expo-status-bar'
 import useAppwrite from '../../lib/useAppwrite'
-import { getUserPosts, signOut } from '../../lib/appWrite'
+import { getFollowers, getFollowings, getUserPosts, signOut } from '../../lib/appWrite'
 import VideoCard from '../../components/VideoCard'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { icons } from '../../constants'
@@ -14,6 +14,8 @@ import InfoBox from '../../components/InfoBox'
 const Profile = () => {
     const { user, setUser, setIsLoggedIn } = useGlobalContext()
     const { data: posts } = useAppwrite(() => getUserPosts(user?.$id))
+    const { data: following, refetch: refetchFollowing } = useAppwrite(() => getFollowings(user?.$id))
+    const { data: followers, refetch: refetchFollowers } = useAppwrite(() => getFollowers(user?.$id))
 
     const onLogout = async () => {
         await signOut()
@@ -21,10 +23,6 @@ const Profile = () => {
         setIsLoggedIn(false)
 
         router.replace("/SignIn")
-    }
-
-    if (!user) {
-        return <View>Loading...</View>; // or some other loading indicator
     }
 
     return (
@@ -36,7 +34,7 @@ const Profile = () => {
                     <VideoCard video={item} post={item} />
                 )}
                 ListHeaderComponent={() => (
-                    <View className='w-full justify-center items-center mt-6 mb-12 px-4'>
+                    <View className='w-full justify-center items-center mb-12 px-4'>
                         <TouchableOpacity
                             className='w-full items-end mb-10'
                             onPress={onLogout}
@@ -56,22 +54,28 @@ const Profile = () => {
                             />
                         </View>
 
-                        <InfoBox
-                            title={user?.username}
-                            containerStyle="mt-5"
-                            titleStyles="text-lg"
-                        />
+                        <View className='mt-5'>
+                            <Text className={`text-white text-center font-psemibold text-lg`}>{user?.username}</Text>
+                        </View>
 
-                        <View className='mt-5 flex-row'>
+                        <View
+                            className='mt-5 flex-row w-[100%] items-center justify-center'
+                            style={{ gap: 50 }}
+                        >
                             <InfoBox
                                 title={posts.length || 0}
                                 subtitle="Posts"
-                                containerStyle="mr-10"
                                 titleStyles="text-xl"
                             />
 
                             <InfoBox
-                                title={"1.2k"}
+                                title={following.length || 0}
+                                subtitle="Following"
+                                titleStyles="text-xl"
+                            />
+
+                            <InfoBox
+                                title={followers.length || 0}
                                 subtitle="Followers"
                                 titleStyles="text-xl"
                             />

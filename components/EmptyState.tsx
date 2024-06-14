@@ -4,7 +4,7 @@ import { images } from '../constants'
 import CustomButton from './CustomButton'
 import { router } from 'expo-router'
 
-const EmptyState = ({ title, subtitle }: { title: string, subtitle: string }) => {
+const EmptyState = ({ title, subtitle }: { title: string, subtitle?: string }) => {
     return (
         <View className='justify-center items-center px-4'>
             <Image

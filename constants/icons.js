@@ -13,6 +13,7 @@ import eye from "../assets/icons/eye.png";
 import play from "../assets/icons/play.png";
 import like from "../assets/icons/like.png";
 import liked from "../assets/icons/liked.png";
+import friends from "../assets/icons/friends.png";
 
 export default {
   play,
@@ -30,4 +31,5 @@ export default {
   eye,
   like,
   liked,
+  friends,
 };

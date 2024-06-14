@@ -8,9 +8,14 @@ const InfoBox = ({ title, subtitle, containerStyle, titleStyles }: {
     titleStyles?: any,
 }) => {
     return (
-        <View className={containerStyle}>
-            <Text className={`text-white text-center font-psemibold ${titleStyles}`}>{title}</Text>
-            <Text className={`text-sm text-gray-100 text-center font-pregular`}>{subtitle}</Text>
+        <View style={{
+            alignItems: "center",
+            justifyContent: "center",
+            width: 70,
+            height: 70
+        }}>
+            <Text className='font-psemibold text-white text-lg'>{title}</Text>
+            <Text className='font-pregular text-white text-sm'>{subtitle}</Text>
         </View>
     )
 }

@@ -4,27 +4,31 @@ import { icons, images } from '../constants'
 import { ResizeMode, Video } from 'expo-av'
 import { checkIfLiked, getVideoLikes, likeVideo, unlikeVideo } from '../lib/appWrite'
 import { useGlobalContext } from '../context/GlobalProvider'
+import useAppwrite from '../lib/useAppwrite'
 
 const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, avatar } }, post }: { video: any, post?: any }) => {
     const [play, setPlay] = useState(false)
     const [liked, setLiked] = useState(false)
     const { user } = useGlobalContext()
-    const [likes, setLikes] = useState(0);
+    const { data: likes, refetch } = useAppwrite(() => getVideoLikes(post.$id))
+
 
     const handleLike = async () => {
         if (liked) {
-            await unlikeVideo(post.$id, user.$id)
+            await unlikeVideo(post.$id, user.$id);
             setLiked(false);
         } else {
-            await likeVideo(post.$id, user.$id)
+            await likeVideo(post.$id, user.$id);
             setLiked(true);
         }
+    };
 
-    }
+    useEffect(() => {
+        refetch()
+    }, [liked])
 
     useEffect(() => {
         if (post) {
-            getVideoLikes(post.$id).then((likes) => setLikes(likes));
             checkIfLiked(post.$id, user.$id).then((isLiked) => setLiked(isLiked));
         }
     }, [post, user.$id]);

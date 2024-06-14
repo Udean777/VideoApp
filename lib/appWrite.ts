@@ -8,7 +8,8 @@ export const config = {
     userCollectionId: "666abf320024035e6682",
     videCollectionId: "666abf630013566ab484",
     storageId: "666ac0a100083240281e",
-    likesCollectionId: "666bd6f1000b51feb223"
+    likesCollectionId: "666bd6f1000b51feb223",
+    followsCollectionId: "666c4a8e002680e2571b"
 }
 
 const {
@@ -20,6 +21,7 @@ const {
     videCollectionId,
     storageId,
     likesCollectionId,
+    followsCollectionId,
 } = config
 
 // Init your React Native SDK
@@ -109,6 +111,19 @@ export const getCurrentUser = async () => {
         return currentUser.documents[0]
     } catch (error) {
         console.error(error)
+    }
+}
+
+export const getAllUsers = async () => {
+    try {
+        const users = await databases.listDocuments(
+            databaseId,
+            userCollectionId,
+        )
+
+        return users.documents
+    } catch (error: any) {
+        throw new Error(error)
     }
 }
 
@@ -260,7 +275,7 @@ export const likeVideo = async (videoId: string, userId: string) => {
             }
         )
 
-        console.log(response)
+        // console.log(response)
         return response
     } catch (error: any) {
         console.error("Error like video", error)
@@ -324,3 +339,135 @@ export const checkIfLiked = async (videoId: string, userId: string) => {
         return false
     }
 }
+
+export const followUser = async (userId: string, followedUserId: string) => {
+    try {
+        const query = Query.and([
+            Query.equal("userId", userId),
+            Query.equal("followedUserId", followedUserId)
+        ])
+
+        const existingFollow = await databases.listDocuments(
+            databaseId,
+            followsCollectionId,
+            [query]
+        )
+
+        if (existingFollow.documents.length === 0) {
+            const newFollow = await databases.createDocument(
+                databaseId,
+                followsCollectionId,
+                ID.unique(),
+                {
+                    id: ID.unique(),
+                    userId,
+                    followedUserId,
+                    createdAt: new Date().toISOString()
+                }
+            )
+
+            return newFollow
+        } else {
+            throw new Error("You are already following this user")
+        }
+    } catch (error) {
+        console.error(error)
+        throw error
+    }
+}
+
+export const unfollowUser = async (userId: string, followedUserId: string) => {
+    try {
+        const query = Query.and([
+            Query.equal("userId", userId),
+            Query.equal("followedUserId", followedUserId)
+        ])
+
+        const existingFollow = await databases.listDocuments(
+            databaseId,
+            followsCollectionId,
+            [query]
+        )
+
+        if (existingFollow.documents.length > 0) {
+            await databases.deleteDocument(
+                databaseId,
+                followsCollectionId,
+                existingFollow.documents[0].$id
+            );
+            return true;
+        } else {
+            throw new Error('You are not following this user');
+        }
+    } catch (error) {
+        console.error(error)
+        throw error
+    }
+}
+
+export const getFollowers = async (userId: string) => {
+    try {
+        const query = Query.equal('followedUserId', userId);
+        const followers = await databases.listDocuments(
+            databaseId,
+            followsCollectionId,
+            [query]
+        );
+
+        // Filter supaya tidak menampilkan followers dari akun sendiri
+        const filteredFollowers = followers.documents.filter(doc => doc.userId !== userId);
+
+        return filteredFollowers.map((doc) => doc.userId);
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
+
+
+export const getFollowings = async (userId: string) => {
+    try {
+        const query = Query.equal('userId', userId);
+        const followings = await databases.listDocuments(
+            databaseId,
+            followsCollectionId,
+            [query]
+        );
+
+        // Filter supaya tidak menampilkan following dari akun sendiri
+        const filteredFollowings = followings.documents.filter(doc => doc.followedUserId !== userId);
+
+        return filteredFollowings.map((doc) => doc.followedUserId);
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
+
+
+export const fetchFollowing = async (userId: string, users: any) => {
+    const followingData = await Promise.all(
+        users.map(async (user: any) => {
+            const query = Query.and([
+                Query.equal('userId', userId),
+                Query.equal('followedUserId', user.$id),
+            ]);
+
+            const existingFollow = await databases.listDocuments(
+                databaseId,
+                followsCollectionId,
+                [query]
+            );
+
+            return existingFollow.documents.length > 0;
+        })
+    );
+
+    const followingObj = followingData.reduce((acc, curr, index) => {
+        acc[users[index].$id] = curr;
+
+        return acc;
+    }, {});
+
+    return followingObj;
+};

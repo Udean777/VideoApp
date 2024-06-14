@@ -20,7 +20,6 @@ const useAppwrite = (fn: any) => {
     }
 
     useEffect(() => {
-
         fetchData()
     }, [])
 
