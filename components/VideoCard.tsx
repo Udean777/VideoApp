@@ -5,7 +5,7 @@ import { ResizeMode, Video } from 'expo-av'
 import { checkIfLiked, getVideoLikes, likeVideo, unlikeVideo } from '../lib/appWrite'
 import { useGlobalContext } from '../context/GlobalProvider'
 
-const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, avatar } }, post }: any) => {
+const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, avatar } }, post }: { video: any, post?: any }) => {
     const [play, setPlay] = useState(false)
     const [liked, setLiked] = useState(false)
     const { user } = useGlobalContext()
@@ -23,10 +23,11 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, 
     }
 
     useEffect(() => {
-        getVideoLikes(post.$id).then((likes) => setLikes(likes));
-
-        checkIfLiked(post.$id, user.$id).then((isLiked) => setLiked(isLiked))
-    }, [post.$id, user.$id]);
+        if (post) {
+            getVideoLikes(post.$id).then((likes) => setLikes(likes));
+            checkIfLiked(post.$id, user.$id).then((isLiked) => setLiked(isLiked));
+        }
+    }, [post, user.$id]);
 
     // console.log(likesCount)
 

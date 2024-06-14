@@ -13,8 +13,7 @@ import InfoBox from '../../components/InfoBox'
 
 const Profile = () => {
     const { user, setUser, setIsLoggedIn } = useGlobalContext()
-    const { query } = useLocalSearchParams<{ query: any }>()
-    const { data: posts, refetch } = useAppwrite(() => getUserPosts(user.$id))
+    const { data: posts } = useAppwrite(() => getUserPosts(user?.$id))
 
     const onLogout = async () => {
         await signOut()
@@ -24,13 +23,17 @@ const Profile = () => {
         router.replace("/SignIn")
     }
 
+    if (!user) {
+        return <View>Loading...</View>; // or some other loading indicator
+    }
+
     return (
         <SafeAreaView className='bg-primary h-full'>
             <FlatList
                 data={posts}
                 keyExtractor={(item) => item.$id}
                 renderItem={({ item }) => (
-                    <VideoCard video={item} />
+                    <VideoCard video={item} post={item} />
                 )}
                 ListHeaderComponent={() => (
                     <View className='w-full justify-center items-center mt-6 mb-12 px-4'>
