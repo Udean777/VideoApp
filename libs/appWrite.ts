@@ -475,7 +475,6 @@ export const fetchFollowing = async (userId: string, users: any) => {
 // Edit User
 export const editUser = async (accountId: string, newUserData: any) => {
     try {
-        // Fetch the current user document
         const currentUser = await databases.listDocuments(
             databaseId,
             userCollectionId,
@@ -488,7 +487,6 @@ export const editUser = async (accountId: string, newUserData: any) => {
 
         const userId = currentUser.documents[0].$id;
 
-        // Update the user document with the new data
         const updatedUser = await databases.updateDocument(
             databaseId,
             userCollectionId,

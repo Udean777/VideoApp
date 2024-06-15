@@ -1,6 +1,6 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { icons, images } from '../constants'
+import { icons } from '../constants'
 import { ResizeMode, Video } from 'expo-av'
 import { checkIfLiked, getVideoLikes, likeVideo, unlikeVideo } from '@/libs/appWrite'
 import { useGlobalContext } from '../context/GlobalProvider'
@@ -10,15 +10,15 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, 
     const [play, setPlay] = useState(false)
     const [liked, setLiked] = useState(false)
     const { user } = useGlobalContext()
-    const { data: likes, refetch } = useAppwrite(() => getVideoLikes(post.$id))
+    const { data: likes, refetch } = useAppwrite(() => getVideoLikes(post?.$id))
 
 
     const handleLike = async () => {
         if (liked) {
-            await unlikeVideo(post.$id, user.$id);
+            await unlikeVideo(post?.$id, user?.$id);
             setLiked(false);
         } else {
-            await likeVideo(post.$id, user.$id);
+            await likeVideo(post?.$id, user?.$id);
             setLiked(true);
         }
     };
@@ -29,14 +29,14 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, 
 
     useEffect(() => {
         if (post) {
-            checkIfLiked(post.$id, user.$id).then((isLiked: any) => setLiked(isLiked));
+            checkIfLiked(post?.$id, user?.$id).then((isLiked: any) => setLiked(isLiked));
         }
-    }, [post, user.$id]);
+    }, [post, user?.$id]);
 
     // console.log(likesCount)
 
     return (
-        <View className='flex-col items-center px-4 mb-14'>
+        <View className='items-center px-4 mb-14'>
             <View className='flex-row gap-3 items-start'>
                 <View className='justify-center items-center flex-row flex-1'>
                     <View className='w-[46px] h-[46px] rounded-full border border-secondary justify-center items-center p-0.5'>
@@ -48,10 +48,7 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, 
                     </View>
 
                     <View className='justify-center flex-1 ml-3 gap-y-1'>
-                        <Text className='text-white font-psemibold text-sm' numberOfLines={1}>
-                            {title}
-                        </Text>
-                        <Text className='text-xs text-gray-100 font-pregular' numberOfLines={1}>
+                        <Text className='text-base text-white font-psemibold' numberOfLines={1}>
                             {username}
                         </Text>
                     </View>
@@ -98,11 +95,9 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, 
             }
 
             <View style={{
-                flexDirection: "row",
-                alignSelf: "flex-start",
-                alignItems: "center",
                 gap: 10
-            }}>
+            }}
+                className='flex-row self-start items-center mt-3'>
                 <TouchableOpacity
                     activeOpacity={0.7}
                     className='pt-2'
@@ -110,12 +105,17 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, 
                 >
                     <Image
                         source={liked ? icons.liked : icons.like}
-                        className='w-10 h-10'
+                        className='w-8 h-8'
                         resizeMode='contain'
                         tintColor={"#fff"}
                     />
                 </TouchableOpacity>
-                <Text className='text-white font-psemibold text-lg'>{likes || 0} likes</Text>
+            </View>
+            <Text className='text-white mt-3 font-psemibold text-sm self-start'>{likes || 0} likes</Text>
+            <View className='self-start mt-3'>
+                <Text className='text-white font-pregular text-xs' numberOfLines={1}>
+                    <Text className='font-pbold text-white text-sm'>{username}</Text>{"  "}{title}
+                </Text>
             </View>
         </View>
     )
