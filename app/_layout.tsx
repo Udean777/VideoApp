@@ -1,13 +1,13 @@
 import { useFonts } from 'expo-font';
-import { SplashScreen, Stack } from 'expo-router';
-import { useEffect } from 'react';
-import GlobalProvider from '@/context/GlobalProvider';
+import { router, SplashScreen, Stack, useSegments } from 'expo-router';
+import { useEffect, useState } from 'react';
+import GlobalProvider, { useGlobalContext } from '@/context/GlobalProvider';
 import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+const InitialLayout = () => {
     const [fontsLoaded, error] = useFonts({
         "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
         "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
@@ -19,6 +19,9 @@ export default function RootLayout() {
         "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
         "Poppins-Thin": require("../assets/fonts/Poppins-Thin.ttf"),
     });
+    const segments = useSegments();
+    const { isLoading, isLoggedIn } = useGlobalContext();
+    const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
         if (error) throw error;
@@ -28,42 +31,46 @@ export default function RootLayout() {
         }
     }, [fontsLoaded, error]);
 
-    if (!fontsLoaded) {
-        return (
-            <View className='flex-1 justify-center items-center'>
-                <ActivityIndicator size={"large"} />
-            </View>
-        )
-    }
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
-    if (!fontsLoaded && !error) {
+    useEffect(() => {
+        if (!isMounted || !fontsLoaded || isLoading) return;
+
+        const inAuthGroup = segments[0] === "(auth)";
+
+        if (isLoggedIn && inAuthGroup) {
+            router.replace("/(tabs)/Home");
+        } else if (!isLoggedIn && !inAuthGroup) {
+            router.replace("/(auth)/SignIn");
+        }
+    }, [isLoggedIn, isLoading, segments, isMounted, fontsLoaded]);
+
+    if (!fontsLoaded || isLoading) {
         return (
-            <View className='flex-1 justify-center items-center'>
-                <ActivityIndicator size={"large"} />
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: "center" }}>
+                <ActivityIndicator size={"large"} color={"#000"} />
             </View>
-        )
+        );
     }
 
     return (
+        <Stack>
+            <Stack.Screen name='index' options={{ headerShown: false }} />
+            <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+            <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+            <Stack.Screen name='search/[query]' options={{ headerShown: false }} />
+            <Stack.Screen name='(edit)' options={{ headerShown: false }} />
+        </Stack>
+    );
+};
+
+export default function RootLayout() {
+    return (
         <GlobalProvider>
             <SafeAreaView style={{ flex: 1 }}>
-                <Stack>
-                    <Stack.Screen name='index' options={{
-                        headerShown: false
-                    }} />
-
-                    <Stack.Screen name='(auth)' options={{
-                        headerShown: false
-                    }} />
-
-                    <Stack.Screen name='(tabs)' options={{
-                        headerShown: false
-                    }} />
-
-                    <Stack.Screen name='search/[query]' options={{
-                        headerShown: false
-                    }} />
-                </Stack>
+                <InitialLayout />
             </SafeAreaView>
         </GlobalProvider>
     );

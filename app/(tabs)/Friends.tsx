@@ -68,10 +68,11 @@ const Friends = () => {
                                     <TouchableOpacity
                                         onPress={() => toggleFollow(user.$id, item.$id, setFollowing)}
                                         activeOpacity={0.7}
-                                        className={`bg-secondary rounded-xl py-2 px-10 justify-center items-center`}
+                                        className={`${following[item.$id] ? "bg-transparent border-2 border-secondary" : "bg-secondary border-2 border-secondary"}
+                                             rounded-xl py-2 px-10 justify-center items-center`}
                                     >
                                         {following[item.$id] ? (
-                                            <Text className={`text-primary font-psemibold text-sm`}>Followed</Text>
+                                            <Text className={`text-secondary font-psemibold text-sm`}>Followed</Text>
                                         ) : (
                                             <Text className={`text-primary font-psemibold text-sm`}>Follow</Text>
                                         )}

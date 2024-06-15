@@ -1,5 +1,5 @@
-import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native'
-import React from 'react'
+import { View, Text, FlatList, TouchableOpacity, Image, RefreshControl } from 'react-native'
+import React, { useState } from 'react'
 import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import EmptyState from '@/components/EmptyState'
@@ -16,6 +16,7 @@ const Profile = () => {
     const { data: posts } = useAppwrite(() => getUserPosts(user?.$id))
     const { data: following, refetch: refetchFollowing } = useAppwrite(() => getFollowings(user?.$id))
     const { data: followers, refetch: refetchFollowers } = useAppwrite(() => getFollowers(user?.$id))
+    const [refreshing, setRefreshing] = useState(false)
 
     const onLogout = async () => {
         await signOut()
@@ -23,6 +24,13 @@ const Profile = () => {
         setIsLoggedIn(false)
 
         router.replace("/SignIn")
+    }
+
+    const onRefresh = async () => {
+        setRefreshing(true)
+        await refetchFollowers()
+        await refetchFollowing()
+        setRefreshing(false)
     }
 
     return (
@@ -46,17 +54,38 @@ const Profile = () => {
                             />
                         </TouchableOpacity>
 
-                        <View className='w-16 h-16 border border-secondary rounded-lg justify-center items-center'>
+                        <View className='w-16 h-16 border border-secondary rounded-full justify-center items-center'>
                             <Image
                                 source={{ uri: user?.avatar }}
-                                className='w-[90%] h-[90%] rounded-lg'
+                                className='w-[90%] h-[90%] rounded-full'
                                 resizeMode='cover'
                             />
                         </View>
 
                         <View className='mt-5'>
                             <Text className={`text-white text-center font-psemibold text-lg`}>{user?.username}</Text>
+                            <Text className={`text-white text-center font-psemibold text-xs`}>{user?.email}</Text>
                         </View>
+
+                        {user?.$id ?
+                            <View className='mt-5 w-full'>
+                                <TouchableOpacity
+                                    onPress={() => router.navigate(`EditProfile`)}
+                                    className='bg-primary border-2 border-secondary py-2 w-full items-center rounded-lg'>
+                                    <Text className='font-psemibold text-secondary'>Edit Profile</Text>
+                                </TouchableOpacity>
+                            </View>
+                            :
+                            <View className='mt-5 flex-row' style={{ gap: 10 }}>
+                                <TouchableOpacity className='bg-primary border-2 border-secondary py-2 flex-1 items-center rounded-lg'>
+                                    <Text className='font-psemibold text-secondary'>Follow</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity className='bg-primary border-2 border-secondary py-2 flex-1 items-center rounded-lg'>
+                                    <Text className='font-psemibold text-secondary'>Message</Text>
+                                </TouchableOpacity>
+                            </View>
+                        }
+
 
                         <View
                             className='mt-5 flex-row w-[100%] items-center justify-center'
@@ -88,6 +117,7 @@ const Profile = () => {
                         subtitle="No videos found for this query"
                     />
                 )}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             />
 
             <StatusBar backgroundColor='#161622' style='light' />

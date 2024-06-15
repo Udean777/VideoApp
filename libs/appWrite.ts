@@ -471,3 +471,34 @@ export const fetchFollowing = async (userId: string, users: any) => {
 
     return followingObj;
 };
+
+// Edit User
+export const editUser = async (accountId: string, newUserData: any) => {
+    try {
+        // Fetch the current user document
+        const currentUser = await databases.listDocuments(
+            databaseId,
+            userCollectionId,
+            [Query.equal("accountId", accountId)]
+        );
+
+        if (!currentUser || currentUser.documents.length === 0) {
+            throw new Error("User not found");
+        }
+
+        const userId = currentUser.documents[0].$id;
+
+        // Update the user document with the new data
+        const updatedUser = await databases.updateDocument(
+            databaseId,
+            userCollectionId,
+            userId,
+            newUserData
+        );
+
+        return updatedUser;
+    } catch (error: any) {
+        console.error("Error editing user", error);
+        throw new Error(error);
+    }
+};
