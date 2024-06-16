@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, Image, FlatList, RefreshControl, Alert } from 'react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
 import { icons } from '@/constants';
@@ -7,32 +7,56 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import InfoBox from '@/components/InfoBox';
 import EmptyState from '@/components/EmptyState';
 import { StatusBar } from 'expo-status-bar';
-import { followUser, getUserDetails, unfollowUser } from '@/libs/appWrite';
 import { useGlobalContext } from '@/context/GlobalProvider';
-import useUserDetails from '@/libs/useUserDetails';
+import useAppwrite from '@/libs/useAppwrite';
+import { followUser, getFollowers, getFollowings, getUserDetails, getUserPosts, unfollowUser } from '@/libs/appWrite';
 
 const DetailUser = () => {
     const { DetailUser } = useLocalSearchParams<{ DetailUser: any }>();
-    const { user: currentUser } = useGlobalContext()
-    const { error, followers, following, loading, posts, refetch, toggleFollow, user } = useUserDetails(DetailUser)
+    const { user: currentUser } = useGlobalContext();
+    const { data: posts, isLoading: postsLoading, refetch: refetchPosts } = useAppwrite(() => getUserPosts(DetailUser));
+    const { data: following, refetch: refetchFollowing } = useAppwrite(() => getFollowings(DetailUser));
+    const { data: followers, refetch: refetchFollowers, setData: setFollowers } = useAppwrite(() => getFollowers(DetailUser));
+    const { data: user, refetch: refetchUser } = useAppwrite(() => getUserDetails(DetailUser));
+    const [isFollowing, setIsFollowing] = useState(false);
 
+    const checkIfFollowing = useCallback(() => {
+        const isFollowingUser = followers.some((f: any) => f === currentUser?.$id);
+        setIsFollowing(isFollowingUser);
+    }, [followers, currentUser?.$id]);
 
+    useEffect(() => {
+        checkIfFollowing();
+    }, [followers, checkIfFollowing]);
 
-    if (loading) {
-        return (
-            <SafeAreaView className='bg-primary h-full justify-center items-center'>
-                <ActivityIndicator size={"large"} color={"#fff"} />
-            </SafeAreaView>
-        );
-    }
+    const toggleFollow = useCallback(async () => {
+        if (isFollowing) {
+            try {
+                await unfollowUser(currentUser?.$id, DetailUser);
+                setFollowers((prevFollowers: any) => prevFollowers.filter((f: any) => f !== currentUser?.$id));
+                setIsFollowing(false);
+            } catch (error: any) {
+                Alert.alert("Error", error.message);
+            }
+        } else {
+            try {
+                await followUser(currentUser?.$id, DetailUser);
+                setFollowers((prevFollowers: any) => [...prevFollowers, currentUser?.$id]);
+                setIsFollowing(true);
+            } catch (error: any) {
+                Alert.alert("Error", error.message);
+            }
+        }
+    }, [isFollowing, currentUser?.$id, DetailUser, setFollowers]);
 
-    if (error) {
-        return (
-            <SafeAreaView className='bg-primary h-full justify-center items-center'>
-                <Text className='text-white'>{error}</Text>
-            </SafeAreaView>
-        );
-    }
+    const onRefresh = useCallback(() => {
+        refetchPosts();
+        refetchFollowing();
+        refetchFollowers();
+        refetchUser();
+    }, [refetchPosts, refetchFollowing, refetchFollowers, refetchUser]);
+
+    // console.log("is following", isFollowing)
 
     return (
         <SafeAreaView className='bg-primary h-full'>
@@ -70,12 +94,12 @@ const DetailUser = () => {
 
                         <View className='mt-5 flex-row' style={{ gap: 10 }}>
                             <TouchableOpacity
-                                onPress={() => toggleFollow(currentUser?.$id, user?.$id)}
+                                onPress={toggleFollow}
                                 activeOpacity={0.7}
-                                className={`${following[user?.$id] ? "bg-transparent border-2 border-secondary" : "bg-secondary border-2 border-secondary"}
-                                       rounded-xl py-2 px-10 justify-center items-center`}
+                                className={`${isFollowing ? "bg-transparent border-2 border-secondary" : "bg-secondary border-2 border-secondary"}
+                                             rounded-xl py-2 px-10 justify-center items-center`}
                             >
-                                {following[user?.$id] ? (
+                                {isFollowing ? (
                                     <Text className={`text-secondary font-psemibold text-sm`}>Followed</Text>
                                 ) : (
                                     <Text className={`text-primary font-psemibold text-sm`}>Follow</Text>
@@ -117,7 +141,7 @@ const DetailUser = () => {
                         subtitle="No videos found for this query"
                     />
                 )}
-                refreshControl={<RefreshControl refreshing={loading} onRefresh={refetch} />}
+                refreshControl={<RefreshControl refreshing={postsLoading} onRefresh={onRefresh} />}
             />
 
             <StatusBar backgroundColor='#161622' style='light' />

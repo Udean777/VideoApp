@@ -2,13 +2,14 @@ import { useEffect, useState, useCallback } from 'react';
 import { getUserDetails, followUser, unfollowUser } from '@/libs/appWrite';
 import { Alert } from 'react-native';
 
-const useUserDetails = (userId: string) => {
+const useUserDetails = (userId: string, currentUserId: string) => {
     const [user, setUser] = useState<any>(null);
     const [posts, setPosts] = useState<any[]>([]);
     const [followers, setFollowers] = useState<string[]>([]);
     const [following, setFollowing] = useState<{ [key: string]: boolean }>({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isFollowing, setIsFollowing] = useState<any>(null)
 
     const fetchUserDetails = useCallback(async () => {
         setLoading(true);
@@ -17,6 +18,7 @@ const useUserDetails = (userId: string) => {
             setUser(userDetails);
             setPosts(userDetails.posts);
             setFollowers(userDetails.followers);
+            setIsFollowing(userDetails.followings.includes(currentUserId));
             const followingState = userDetails.followings.reduce((acc: any, id: string) => {
                 acc[id] = true;
                 return acc;
@@ -65,7 +67,7 @@ const useUserDetails = (userId: string) => {
         fetchUserDetails();
     }, [fetchUserDetails]);
 
-    return { user, posts, followers, following, loading, error, toggleFollow, refetch };
+    return { user, posts, followers, following, loading, error, toggleFollow, refetch, isFollowing };
 };
 
 export default useUserDetails;
