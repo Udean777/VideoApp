@@ -1,19 +1,19 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, Text, Image, TouchableOpacity, Pressable } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
 import { icons } from '../constants'
 import { ResizeMode, Video } from 'expo-av'
 import { checkIfLiked, getVideoLikes, likeVideo, unlikeVideo } from '@/libs/appWrite'
 import { useGlobalContext } from '../context/GlobalProvider'
 import useAppwrite from '@/libs/useAppwrite'
+import { router } from 'expo-router'
 
-const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, avatar } }, post }: { video: any, post?: any }) => {
+const VideoCard = ({ video: { id, title, thumbnail, video, creator: { accountId, username, avatar } }, post, userId }: { video: any, post?: any, userId?: any }) => {
     const [play, setPlay] = useState(false)
     const [liked, setLiked] = useState(false)
     const { user } = useGlobalContext()
     const { data: likes, refetch } = useAppwrite(() => getVideoLikes(post?.$id))
 
-
-    const handleLike = async () => {
+    const handleLike = useCallback(async () => {
         if (liked) {
             await unlikeVideo(post?.$id, user?.$id);
             setLiked(false);
@@ -21,7 +21,9 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, 
             await likeVideo(post?.$id, user?.$id);
             setLiked(true);
         }
-    };
+    }, [liked, post?.$id, user?.$id]);
+
+    // console.log(JSON.stringify(post.creator.$id, null, 2))
 
     useEffect(() => {
         refetch()
@@ -35,10 +37,15 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, 
 
     // console.log(likesCount)
 
+    const handlePress = (id: string) => {
+        console.log('Navigating to user detail with accountId:', id);
+        router.navigate(`(details)/${id}`);
+    };
+
     return (
         <View className='items-center px-4 mb-14'>
             <View className='flex-row gap-3 items-start'>
-                <View className='justify-center items-center flex-row flex-1'>
+                <Pressable onPress={() => user.$id == post.creator.$id ? router.navigate("Profile") : handlePress(post.creator.$id)} className='justify-center items-center flex-row flex-1'>
                     <View className='w-[46px] h-[46px] rounded-full border border-secondary justify-center items-center p-0.5'>
                         <Image
                             source={{ uri: avatar }}
@@ -52,7 +59,7 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, 
                             {username}
                         </Text>
                     </View>
-                </View>
+                </Pressable>
 
                 <View className='pt-2'>
                     <Image
@@ -66,7 +73,7 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, 
             {play ? (
                 <Video
                     source={{ uri: video }}
-                    className='w-full h-60 rounded-xl mt-3 '
+                    className='w-full h-[550px] rounded-xl mt-3 '
                     resizeMode={ResizeMode.CONTAIN}
                     useNativeControls
                     shouldPlay
@@ -107,7 +114,7 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { username, 
                         source={liked ? icons.liked : icons.like}
                         className='w-8 h-8'
                         resizeMode='contain'
-                        tintColor={"#fff"}
+                        tintColor={liked ? "#ee0061" : "#fff"}
                     />
                 </TouchableOpacity>
             </View>

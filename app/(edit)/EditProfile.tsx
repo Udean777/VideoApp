@@ -1,6 +1,6 @@
-import { View, Text, TextInput, Button, StyleSheet, Image, ActivityIndicator, TouchableOpacity } from 'react-native'
+import { View, Text, Image, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { router, useLocalSearchParams } from 'expo-router'
+import { router } from 'expo-router'
 import { useGlobalContext } from '@/context/GlobalProvider'
 import * as ImagePicker from "expo-image-picker"
 import { editUser } from '@/libs/appWrite'
@@ -25,7 +25,7 @@ const EditProfile = () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [4, 3],
+            aspect: [6, 6],
             quality: 1,
         });
 

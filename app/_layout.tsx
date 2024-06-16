@@ -62,6 +62,7 @@ const InitialLayout = () => {
             <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
             <Stack.Screen name='search/[query]' options={{ headerShown: false }} />
             <Stack.Screen name='(edit)' options={{ headerShown: false }} />
+            <Stack.Screen name='(details)' options={{ headerShown: false }} />
         </Stack>
     );
 };

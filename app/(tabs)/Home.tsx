@@ -25,15 +25,13 @@ const Home = () => {
         setRefreshing(false)
     }
 
-    // console.log(posts)
-
     return (
         <SafeAreaView className='bg-primary h-full'>
             <FlatList
                 data={posts}
                 keyExtractor={(item) => item.$id}
                 renderItem={({ item }) => (
-                    <VideoCard video={item} post={item} />
+                    <VideoCard video={item} post={item} userId={item.$id} />
                 )}
                 ListHeaderComponent={() => (
                     <View className=' px-4 space-y-6'>

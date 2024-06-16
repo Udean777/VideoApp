@@ -67,24 +67,13 @@ const Profile = () => {
                             <Text className={`text-white text-center font-psemibold text-xs`}>{user?.email}</Text>
                         </View>
 
-                        {user?.$id ?
-                            <View className='mt-5 w-full'>
-                                <TouchableOpacity
-                                    onPress={() => router.navigate(`EditProfile`)}
-                                    className='bg-primary border-2 border-secondary py-2 w-full items-center rounded-lg'>
-                                    <Text className='font-psemibold text-secondary'>Edit Profile</Text>
-                                </TouchableOpacity>
-                            </View>
-                            :
-                            <View className='mt-5 flex-row' style={{ gap: 10 }}>
-                                <TouchableOpacity className='bg-primary border-2 border-secondary py-2 flex-1 items-center rounded-lg'>
-                                    <Text className='font-psemibold text-secondary'>Follow</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity className='bg-primary border-2 border-secondary py-2 flex-1 items-center rounded-lg'>
-                                    <Text className='font-psemibold text-secondary'>Message</Text>
-                                </TouchableOpacity>
-                            </View>
-                        }
+                        <View className='mt-5 w-full'>
+                            <TouchableOpacity
+                                onPress={() => router.navigate(`EditProfile`)}
+                                className='bg-primary border-2 border-secondary py-2 w-full items-center rounded-lg'>
+                                <Text className='font-psemibold text-secondary'>Edit Profile</Text>
+                            </TouchableOpacity>
+                        </View>
 
 
                         <View

@@ -173,7 +173,7 @@ export const searchPosts = async (query: string) => {
 }
 
 // Fetch post user  yang sekarang
-export const getUserPosts = async (userId: any) => {
+export const getUserPosts = async (userId: string) => {
     try {
         const posts = await databases.listDocuments(
             databaseId,
@@ -498,5 +498,47 @@ export const editUser = async (accountId: string, newUserData: any) => {
     } catch (error: any) {
         console.error("Error editing user", error);
         throw new Error(error);
+    }
+};
+
+// Get other user details
+export const getUserDetails = async (userId: any) => {
+    try {
+        // Fetch user details
+        const userResponse = await databases.getDocument(
+            databaseId,
+            userCollectionId,
+            userId
+        );
+        const user = userResponse || {};
+
+        // Fetch user posts
+        const postsResponse = await databases.listDocuments(
+            databaseId,
+            videCollectionId,
+            [Query.equal("creator", userId)]
+        );
+        const posts = postsResponse.documents;
+
+        // Fetch user followers
+        const followersResponse = await databases.listDocuments(
+            databaseId,
+            followsCollectionId,
+            [Query.equal("followedUserId", userId)]
+        );
+        const followers = followersResponse.documents.map(doc => doc.userId);
+
+        // Fetch user followings
+        const followingsResponse = await databases.listDocuments(
+            databaseId,
+            followsCollectionId,
+            [Query.equal("userId", userId)]
+        );
+        const followings = followingsResponse.documents.map(doc => doc.followedUserId);
+
+        return { ...user, posts, followers, followings };
+    } catch (error) {
+        console.error('Error getting user details', error);
+        throw new Error('Error getting user details');
     }
 };

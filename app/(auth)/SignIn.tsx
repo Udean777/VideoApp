@@ -39,10 +39,10 @@ const SignIn = () => {
         }
     }
 
-    // const onSignOut = async () => {
-    //     await signOut();
+    const onSignOut = async () => {
+        await signOut();
 
-    // }
+    }
 
     return (
         <SafeAreaView className='bg-primary h-full'>
@@ -80,12 +80,12 @@ const SignIn = () => {
                         isLoading={isSubmitting}
                     />
 
-                    {/* <CustomButton
+                    <CustomButton
                         title='Sign Out'
                         handlePress={onSignOut}
                         containerStyle="mt-7"
                         isLoading={isSubmitting}
-                    /> */}
+                    />
 
                     <View className='justify-center pt-5 flex-row gap-2'>
                         <Text className='text-lg text-gray-100 font-pregular'>

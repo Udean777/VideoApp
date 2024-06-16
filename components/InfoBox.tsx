@@ -2,7 +2,7 @@ import { View, Text } from 'react-native'
 import React from 'react'
 
 const InfoBox = ({ title, subtitle, containerStyle, titleStyles }: {
-    title: string,
+    title: any,
     subtitle?: string,
     containerStyle?: any,
     titleStyles?: any,
