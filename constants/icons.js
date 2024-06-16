@@ -18,6 +18,7 @@ import check from "@/assets/icons/check.png";
 import placeholder from "@/assets/icons/placeholder.png";
 import share from "@/assets/icons/share.png";
 import video from "@/assets/icons/video.png";
+import iconDelete from "@/assets/icons/delete.png";
 
 export default {
   play,
@@ -40,4 +41,5 @@ export default {
   placeholder,
   share,
   video,
+  iconDelete,
 };

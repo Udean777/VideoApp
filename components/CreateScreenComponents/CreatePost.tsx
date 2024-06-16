@@ -20,7 +20,7 @@ const CreatePost = () => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [7, 10],
+            aspect: [8, 10],
             quality: 1
         });
 

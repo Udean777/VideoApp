@@ -23,6 +23,8 @@ const Home = () => {
         setRefreshing(false)
     }
 
+    // console.log(JSON.stringify(posts, null, 2))
+
     // const showModal = useCallback(() => {
     //     setModalVisible(true);
     // }, []);

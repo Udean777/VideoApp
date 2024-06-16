@@ -2,13 +2,13 @@ import { View, Text, Image, TouchableOpacity, Pressable } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { icons } from '../constants'
 import { ResizeMode, Video } from 'expo-av'
-import { checkIfLiked, getVideoLikes, likeVideo, unlikeVideo } from '@/libs/appWrite'
+import { checkIfLiked, deletePost, getVideoLikes, likeVideo, unlikeVideo } from '@/libs/appWrite'
 import { useGlobalContext } from '../context/GlobalProvider'
 import useAppwrite from '@/libs/useAppwrite'
 import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 
-const PostCard = ({ posts: { $id, title, photo, creator: { accountId, username, avatar } } }: { posts?: any, userId?: any }) => {
+const PostCard = ({ posts: { $id, title, photo, $collectionId, creator: { accountId, username, avatar } } }: { posts?: any, userId?: any }) => {
     const [liked, setLiked] = useState(false)
     const { user } = useGlobalContext()
     const { data: likes, refetch } = useAppwrite(() => getVideoLikes($id))
@@ -40,6 +40,11 @@ const PostCard = ({ posts: { $id, title, photo, creator: { accountId, username, 
         router.navigate(`(details)/${id}`);
     };
 
+    const handleDelete = useCallback(async () => {
+        await deletePost($id, $collectionId);
+        // navigate back to previous screen or refresh the list
+    }, [$id, $collectionId]);
+
     // console.log(photo)
 
     return (
@@ -61,13 +66,14 @@ const PostCard = ({ posts: { $id, title, photo, creator: { accountId, username, 
                     </Pressable>
                 </View>
 
-                <View className='pt-2'>
+                <TouchableOpacity onPress={handleDelete} className='pt-2'>
                     <Image
-                        source={icons.menu}
+                        source={icons.iconDelete}
                         className='w-5 h-5'
                         resizeMode='contain'
+                        tintColor={"#FF0000"}
                     />
-                </View>
+                </TouchableOpacity>
             </View>
 
             <View

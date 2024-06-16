@@ -313,6 +313,22 @@ export const createPost = async (form: any) => {
     }
 }
 
+// Hapus post
+export const deletePost = async (postId: string, collectionId: string) => {
+    try {
+        const response = await databases.deleteDocument(
+            databaseId,
+            collectionId,
+            postId
+        )
+
+        return response
+    } catch (error: any) {
+        console.error("Error deleting post", error)
+        throw new Error(error)
+    }
+}
+
 export const likeVideo = async (videoId: string, userId: string) => {
     try {
         const id = ID.unique();
