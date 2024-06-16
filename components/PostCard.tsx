@@ -8,46 +8,45 @@ import useAppwrite from '@/libs/useAppwrite'
 import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 
-const VideoCard = ({ video: { id, title, thumbnail, video, creator: { accountId, username, avatar } }, post, userId }: { video: any, post?: any, userId?: any }) => {
-    const [play, setPlay] = useState(false)
+const PostCard = ({ posts: { $id, title, photo, creator: { accountId, username, avatar } } }: { posts?: any, userId?: any }) => {
     const [liked, setLiked] = useState(false)
     const { user } = useGlobalContext()
-    const { data: likes, refetch } = useAppwrite(() => getVideoLikes(post?.$id))
+    const { data: likes, refetch } = useAppwrite(() => getVideoLikes($id))
 
     const handleLike = useCallback(async () => {
         if (liked) {
-            await unlikeVideo(post?.$id, user?.$id);
+            await unlikeVideo($id, user?.$id);
             setLiked(false);
         } else {
-            await likeVideo(post?.$id, user?.$id);
+            await likeVideo($id, user?.$id);
             setLiked(true);
         }
-    }, [liked, post?.$id, user?.$id]);
+    }, [liked, $id, user?.$id]);
 
-    // console.log(JSON.stringify(post.creator.$id, null, 2))
+    // console.log(JSON.stringify(creator?.$id, null, 2))
 
     useEffect(() => {
         refetch()
     }, [liked])
 
     useEffect(() => {
-        if (post) {
-            checkIfLiked(post?.$id, user?.$id).then((isLiked: any) => setLiked(isLiked));
+        if ($id) {
+            checkIfLiked($id, user?.$id).then((isLiked: any) => setLiked(isLiked));
         }
-    }, [post, user?.$id]);
-
-    // console.log(likesCount)
+    }, [$id, user?.$id]);
 
     const handlePress = (id: string) => {
         console.log('Navigating to user detail with accountId:', id);
         router.navigate(`(details)/${id}`);
     };
 
+    // console.log(photo)
+
     return (
         <View className='items-center px-4 mb-14'>
             <View className='flex-row gap-3 items-start'>
                 <View className='justify-center items-center flex-row flex-1'>
-                    <Pressable onPress={() => user.$id == post.creator.$id ? router.navigate("Profile") : handlePress(post.creator.$id)} className='w-[46px] h-[46px] rounded-full border border-secondary justify-center items-center p-0.5'>
+                    <Pressable onPress={() => user?.$id == $id.creator?.$id ? router.navigate("Profile") : handlePress($id.creator.$id)} className='w-[46px] h-[46px] rounded-full border border-secondary justify-center items-center p-0.5'>
                         <Image
                             source={{ uri: avatar }}
                             className='w-full h-full rounded-full'
@@ -55,7 +54,7 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { accountId,
                         />
                     </Pressable>
 
-                    <Pressable onPress={() => user.$id == post.creator.$id ? router.navigate("Profile") : handlePress(post.creator.$id)} className='justify-center flex-1 ml-3 gap-y-1'>
+                    <Pressable onPress={() => user?.$id == $id.creator?.$id ? router.navigate("Profile") : handlePress($id.creator.$id)} className='justify-center flex-1 ml-3 gap-y-1'>
                         <Text className='text-base text-white font-psemibold' numberOfLines={1}>
                             {username}
                         </Text>
@@ -71,36 +70,15 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { accountId,
                 </View>
             </View>
 
-            {play ? (
-                <Video
-                    source={{ uri: video }}
-                    className='w-full h-[550px] rounded-xl mt-3 '
-                    resizeMode={ResizeMode.CONTAIN}
-                    useNativeControls
-                    shouldPlay
-                    onPlaybackStatusUpdate={(status: any) => {
-                        if (status.didJustFinish) {
-                            setPlay(false)
-                        }
-                    }} />
-            ) : <TouchableOpacity
-                activeOpacity={0.7}
+            <View
                 className='w-full h-[500px] rounded-xl mt-3 relative justify-center items-center'
-                onPress={() => setPlay(true)}
             >
                 <Image
-                    source={{ uri: thumbnail }}
+                    source={{ uri: photo }}
                     className="w-full h-full rounded-xl mt-3"
                     resizeMode="cover"
                 />
-
-                <Image
-                    source={icons.play}
-                    className='w-12 h-12 absolute'
-                    resizeMode='contain'
-                />
-            </TouchableOpacity>
-            }
+            </View>
 
             <View style={{
                 gap: 10
@@ -150,4 +128,4 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { accountId,
     )
 }
 
-export default VideoCard
+export default PostCard

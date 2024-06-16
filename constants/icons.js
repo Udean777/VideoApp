@@ -14,6 +14,10 @@ import play from "@/assets/icons/play.png";
 import like from "@/assets/icons/like.png";
 import liked from "@/assets/icons/liked.png";
 import friends from "@/assets/icons/friends.png";
+import check from "@/assets/icons/check.png";
+import placeholder from "@/assets/icons/placeholder.png";
+import share from "@/assets/icons/share.png";
+import video from "@/assets/icons/video.png";
 
 export default {
   play,
@@ -32,4 +36,8 @@ export default {
   like,
   liked,
   friends,
+  check,
+  placeholder,
+  share,
+  video,
 };

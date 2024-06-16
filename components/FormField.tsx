@@ -2,13 +2,15 @@ import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native'
 import React, { useState } from 'react'
 import { icons } from '../constants'
 
-const FormField = ({ title, value, placeholder, handleChangeText, otherStyles, keyboardType, ...props }: {
+const FormField = ({ title, value, placeholder, handleChangeText, otherStyles, keyboardType, multiline, numberOfLines, ...props }: {
     title: string,
     value: string,
     placeholder?: string,
     handleChangeText: (text: string) => void,
     otherStyles: any,
-    keyboardType?: any
+    keyboardType?: any,
+    multiline?: boolean,
+    numberOfLines?: number,
 }) => {
     const [showPassword, setShowPassword] = useState(false)
 
@@ -25,6 +27,8 @@ const FormField = ({ title, value, placeholder, handleChangeText, otherStyles, k
                     onChangeText={handleChangeText}
                     secureTextEntry={title === "Password" && !showPassword}
                     keyboardType={keyboardType}
+                    multiline={multiline}
+                    numberOfLines={numberOfLines}
                     {...props}
                 />
 

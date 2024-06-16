@@ -83,6 +83,22 @@ const TabsLayout = () => {
                 />
 
                 <Tabs.Screen
+                    name='Reels'
+                    options={{
+                        title: "Reels",
+                        headerShown: false,
+                        tabBarIcon: ({ color, focused }) => (
+                            <TabIcon
+                                icon={icons.video}
+                                color={color}
+                                focused={focused}
+                                name='Reels'
+                            />
+                        )
+                    }}
+                />
+
+                <Tabs.Screen
                     name='Profile'
                     options={{
                         title: "Profile",

@@ -1,21 +1,16 @@
-import { View, Text, FlatList, RefreshControl, TouchableOpacity, StyleSheet } from 'react-native'
-import React, { useCallback, useState } from 'react'
+import { View, Text, FlatList, RefreshControl, StyleSheet } from 'react-native'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import SearchInput from '@/components/SearchInput'
 import EmptyState from '@/components/EmptyState'
-import { getAllOrdinaryPost, getAllPost } from '@/libs/appWrite'
+import { getAllPost } from '@/libs/appWrite'
 import useAppwrite from '@/libs/useAppwrite'
 import VideoCard from '@/components/VideoCard'
 import { StatusBar } from 'expo-status-bar'
-import Story from '@/components/Story'
 import { Ionicons } from '@expo/vector-icons'
-import CustomModal from '@/components/CustomModal'
-import PostCard from '@/components/PostCard'
 
-const Home = () => {
+const Reels = () => {
     const [refreshing, setRefreshing] = useState(false)
-    const { data: posts, refetch } = useAppwrite(getAllOrdinaryPost)
-    const [modalVisible, setModalVisible] = useState(false)
+    const { data: posts, refetch } = useAppwrite(getAllPost)
 
     const onRefresh = async () => {
         setRefreshing(true)
@@ -23,21 +18,13 @@ const Home = () => {
         setRefreshing(false)
     }
 
-    // const showModal = useCallback(() => {
-    //     setModalVisible(true);
-    // }, []);
-
-    // const hideModal = useCallback(() => {
-    //     setModalVisible(false);
-    // }, []);
-
     return (
         <SafeAreaView className='bg-primary h-full'>
             <FlatList
                 data={posts}
                 keyExtractor={(item) => item.$id}
                 renderItem={({ item }) => (
-                    <PostCard posts={item} />
+                    <VideoCard video={item} post={item} userId={item.$id} />
                 )}
                 ListHeaderComponent={() => (
                     <View className=' px-4 space-y-6'>
@@ -47,13 +34,6 @@ const Home = () => {
                                     SioBlues
                                 </Text>
                             </View>
-
-                            {/* <TouchableOpacity
-                                style={styles.openButton}
-                                onPress={showModal}
-                            >
-                                <Text style={styles.openButtonText}>Show Modal</Text>
-                            </TouchableOpacity> */}
 
                             <View style={{ gap: 10 }} className='flex-row'>
                                 <View>
@@ -65,10 +45,6 @@ const Home = () => {
                                 </View>
                             </View>
                         </View>
-
-                        <Story />
-
-                        <SearchInput />
                     </View>
                 )}
                 ListEmptyComponent={() => (
@@ -81,11 +57,6 @@ const Home = () => {
             />
 
             <StatusBar backgroundColor='#161622' style='light' />
-
-            {/* <CustomModal
-                onClose={hideModal}
-                visible={modalVisible}
-            /> */}
 
         </SafeAreaView>
     )
@@ -114,4 +85,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Home
+export default Reels

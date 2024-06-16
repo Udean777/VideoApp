@@ -9,7 +9,8 @@ export const config = {
     videCollectionId: "666abf630013566ab484",
     storageId: "666ac0a100083240281e",
     likesCollectionId: "666bd6f1000b51feb223",
-    followsCollectionId: "666c4a8e002680e2571b"
+    followsCollectionId: "666c4a8e002680e2571b",
+    postsCollectionId: "666ef58b003aefb99324"
 }
 
 const {
@@ -22,6 +23,7 @@ const {
     storageId,
     likesCollectionId,
     followsCollectionId,
+    postsCollectionId,
 } = config
 
 // Init your React Native SDK
@@ -142,6 +144,20 @@ export const getAllPost = async () => {
     }
 }
 
+export const getAllOrdinaryPost = async () => {
+    try {
+        const posts = await databases.listDocuments(
+            databaseId,
+            postsCollectionId,
+            [Query.orderDesc("$createdAt")]
+        )
+
+        return posts.documents
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}
+
 // Fetch post yang baru saja di upload
 export const getLatestPost = async () => {
     try {
@@ -178,6 +194,20 @@ export const getUserPosts = async (userId: string) => {
         const posts = await databases.listDocuments(
             databaseId,
             videCollectionId,
+            [Query.equal("creator", userId)]
+        )
+
+        return posts.documents
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}
+
+export const getUserOrdinaryPosts = async (userId: string) => {
+    try {
+        const posts = await databases.listDocuments(
+            databaseId,
+            postsCollectionId,
             [Query.equal("creator", userId)]
         )
 
@@ -250,6 +280,29 @@ export const createVideo = async (form: any) => {
                 thumbnail: thumbnailUrl,
                 video: videoUrl,
                 prompt: form.prompt,
+                creator: form.userId
+            }
+        )
+
+        return newPost
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}
+
+export const createPost = async (form: any) => {
+    try {
+        const [photoUrl] = await Promise.all([
+            uploadFile(form.photo, "image")
+        ])
+
+        const newPost = await databases.createDocument(
+            databaseId,
+            postsCollectionId,
+            ID.unique(),
+            {
+                title: form.title,
+                photo: photoUrl,
                 creator: form.userId
             }
         )
