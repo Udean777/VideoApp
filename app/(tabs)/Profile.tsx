@@ -106,7 +106,7 @@ const Profile = () => {
 
     return (
         <SafeAreaView className='bg-primary h-full'>
-            <ScrollView showsHorizontalScrollIndicator={false} nestedScrollEnabled>
+            <ScrollView showsHorizontalScrollIndicator={false} nestedScrollEnabled={true}>
                 {renderHeader()}
 
                 <TabView

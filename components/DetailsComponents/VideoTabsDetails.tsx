@@ -1,18 +1,15 @@
-import { FlatList, RefreshControl } from 'react-native'
-import React, { useState } from 'react'
+import { View, Text, FlatList, RefreshControl } from 'react-native'
+import React, { useCallback, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import EmptyState from '@/components/EmptyState'
-import { StatusBar } from 'expo-status-bar'
+import VideoCard from '../VideoCard'
+import EmptyState from '../EmptyState'
 import useAppwrite from '@/libs/useAppwrite'
 import { getFollowers, getFollowings, getUserPosts } from '@/libs/appWrite'
-import VideoCard from '@/components/VideoCard'
-import { useGlobalContext } from '@/context/GlobalProvider'
 
-const VideoTabsScreen = () => {
-    const { user } = useGlobalContext()
-    const { data: posts } = useAppwrite(() => getUserPosts(user?.$id))
-    const { refetch: refetchFollowing } = useAppwrite(() => getFollowings(user?.$id))
-    const { refetch: refetchFollowers } = useAppwrite(() => getFollowers(user?.$id))
+const VideoTabsDetails = ({ DetailUser }: { DetailUser: string }) => {
+    const { data: postVideos } = useAppwrite(() => getUserPosts(DetailUser));
+    const { refetch: refetchFollowing } = useAppwrite(() => getFollowings(DetailUser))
+    const { refetch: refetchFollowers } = useAppwrite(() => getFollowers(DetailUser))
     const [refreshing, setRefreshing] = useState(false)
 
     const onRefresh = async () => {
@@ -26,11 +23,9 @@ const VideoTabsScreen = () => {
         <SafeAreaView className='bg-primary h-full'>
             <FlatList
                 nestedScrollEnabled={true}
-                data={posts}
+                data={postVideos}
                 keyExtractor={(item) => item.$id}
-                renderItem={({ item }) => (
-                    <VideoCard video={item} post={item} />
-                )}
+                renderItem={({ item }) => <VideoCard video={item} post={item} />}
                 ListEmptyComponent={() => (
                     <EmptyState
                         title="No videos found"
@@ -39,11 +34,8 @@ const VideoTabsScreen = () => {
                 )}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             />
-
-            <StatusBar backgroundColor='#161622' style='light' />
-
         </SafeAreaView>
     )
 }
 
-export default VideoTabsScreen
+export default VideoTabsDetails

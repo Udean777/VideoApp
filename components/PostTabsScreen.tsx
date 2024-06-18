@@ -25,6 +25,7 @@ const PostTabsScreen = () => {
     return (
         <SafeAreaView className='bg-primary h-full'>
             <FlatList
+                nestedScrollEnabled={true}
                 data={posts}
                 keyExtractor={(item) => item.$id}
                 renderItem={({ item }) => (

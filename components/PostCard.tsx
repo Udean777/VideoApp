@@ -1,17 +1,17 @@
-import { View, Text, Image, TouchableOpacity, Pressable } from 'react-native'
+import { View, Text, Image, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { icons } from '../constants'
-import { ResizeMode, Video } from 'expo-av'
 import { checkIfLiked, deletePost, getVideoLikes, likeVideo, unlikeVideo } from '@/libs/appWrite'
 import { useGlobalContext } from '../context/GlobalProvider'
 import useAppwrite from '@/libs/useAppwrite'
 import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 
-const PostCard = ({ posts: { $id, title, photo, $collectionId, creator: { accountId, username, avatar } } }: { posts?: any, userId?: any }) => {
+const PostCard = ({ posts: { $id, title, photo, $collectionId, creator } = {} }: { posts?: any, userId?: any }) => {
     const [liked, setLiked] = useState(false)
     const { user } = useGlobalContext()
     const { data: likes, refetch } = useAppwrite(() => getVideoLikes($id))
+    const { accountId, username, avatar } = creator;
 
     const handleLike = useCallback(async () => {
         if (liked) {
@@ -22,8 +22,6 @@ const PostCard = ({ posts: { $id, title, photo, $collectionId, creator: { accoun
             setLiked(true);
         }
     }, [liked, $id, user?.$id]);
-
-    // console.log(JSON.stringify(creator?.$id, null, 2))
 
     useEffect(() => {
         refetch()
@@ -45,13 +43,21 @@ const PostCard = ({ posts: { $id, title, photo, $collectionId, creator: { accoun
         // navigate back to previous screen or refresh the list
     }, [$id, $collectionId]);
 
-    // console.log(photo)
+    if (!creator) {
+        return (
+            <View className='flex-1 justify-center items-center'>
+                <ActivityIndicator size={"large"} />
+            </View>
+        )
+    }
+
+    // console.log(creator.$id === user?.$id)
 
     return (
         <View className='items-center px-4 mb-14'>
             <View className='flex-row gap-3 items-start'>
                 <View className='justify-center items-center flex-row flex-1'>
-                    <Pressable onPress={() => user?.$id == $id.creator?.$id ? router.navigate("Profile") : handlePress($id.creator.$id)} className='w-[46px] h-[46px] rounded-full border border-secondary justify-center items-center p-0.5'>
+                    <Pressable onPress={() => creator.$id === user?.$id ? router.navigate("Profile") : handlePress(creator.$id)} className='w-[46px] h-[46px] rounded-full border border-secondary justify-center items-center p-0.5'>
                         <Image
                             source={{ uri: avatar }}
                             className='w-full h-full rounded-full'
@@ -59,19 +65,18 @@ const PostCard = ({ posts: { $id, title, photo, $collectionId, creator: { accoun
                         />
                     </Pressable>
 
-                    <Pressable onPress={() => user?.$id == $id.creator?.$id ? router.navigate("Profile") : handlePress($id.creator.$id)} className='justify-center flex-1 ml-3 gap-y-1'>
+                    <Pressable onPress={() => creator.$id === user?.$id ? router.navigate("Profile") : handlePress(creator.$id)} className='justify-center flex-1 ml-3 gap-y-1'>
                         <Text className='text-base text-white font-psemibold' numberOfLines={1}>
                             {username}
                         </Text>
                     </Pressable>
                 </View>
 
-                <TouchableOpacity onPress={handleDelete} className='pt-2'>
+                <TouchableOpacity className='pt-2'>
                     <Image
-                        source={icons.iconDelete}
+                        source={icons.menu}
                         className='w-5 h-5'
                         resizeMode='contain'
-                        tintColor={"#FF0000"}
                     />
                 </TouchableOpacity>
             </View>
