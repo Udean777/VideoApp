@@ -10,7 +10,8 @@ export const config = {
     storageId: "666ac0a100083240281e",
     likesCollectionId: "666bd6f1000b51feb223",
     followsCollectionId: "666c4a8e002680e2571b",
-    postsCollectionId: "666ef58b003aefb99324"
+    postsCollectionId: "666ef58b003aefb99324",
+    storiesCollectionId: "667273070025885fe4af"
 }
 
 const {
@@ -24,6 +25,7 @@ const {
     likesCollectionId,
     followsCollectionId,
     postsCollectionId,
+    storiesCollectionId
 } = config
 
 // Init your React Native SDK
@@ -259,6 +261,48 @@ export const uploadFile = async (file: any, type: string) => {
 
         return fileUrl
     } catch (error: any) {
+        throw new Error(error)
+    }
+}
+
+export const uploadStory = async (file: any, userId: string, caption: string) => {
+    if (!file) return
+
+    const asset = {
+        name: file.fileName,
+        type: file.mimeType,
+        size: file.fileSize,
+        uri: file.uri
+    }
+
+    try {
+        const uploadedFile = await storage.createFile(
+            storageId,
+            ID.unique(),
+            asset
+        )
+
+        const fileUrl = await getFilePreview(uploadedFile.$id, asset.type.includes('video') ? 'video' : 'image');
+
+        if (!fileUrl) throw new Error("Failed to get file url")
+
+        const newStory = await databases.createDocument(
+            databaseId,
+            storiesCollectionId,
+            ID.unique(),
+            {
+                creator: userId,
+                fileId: uploadedFile.$id,
+                fileUrl: fileUrl.href,
+                createdAt: new Date().toISOString(),
+                type: asset.type.includes("video") ? "video" : "image",
+                caption: caption
+            }
+        )
+
+        return newStory
+    } catch (error: any) {
+        console.error("Error uploading story", error)
         throw new Error(error)
     }
 }

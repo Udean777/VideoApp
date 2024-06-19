@@ -23,7 +23,7 @@ const PostTabsScreen = () => {
     }
 
     return (
-        <SafeAreaView className='bg-primary h-full'>
+        <SafeAreaView className='bg-primary flex-1'>
             <FlatList
                 nestedScrollEnabled={true}
                 data={posts}

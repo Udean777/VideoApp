@@ -24,7 +24,7 @@ const TabsLayout = () => {
             <Tabs
                 screenOptions={{
                     tabBarShowLabel: false,
-                    tabBarActiveTintColor: "#ffa001",
+                    tabBarActiveTintColor: "#80C4E9",
                     tabBarInactiveTintColor: "#cdcde0",
                     tabBarStyle: {
                         backgroundColor: "#161622",
@@ -104,7 +104,7 @@ const TabsLayout = () => {
                         title: "Profile",
                         headerShown: false,
                         tabBarIcon: ({ focused }) => (
-                            <View className={`w-8 h-8 border ${focused ? "border-secondary" : "border-primary"} rounded-full justify-center items-center`}>
+                            <View className={`w-6 h-6 border ${focused ? "border-secondary" : "border-primary"} rounded-full justify-center items-center`}>
                                 <Image
                                     source={{ uri: user?.avatar }}
                                     className='w-[90%] h-[90%] rounded-full'

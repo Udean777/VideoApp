@@ -19,6 +19,10 @@ import placeholder from "@/assets/icons/placeholder.png";
 import share from "@/assets/icons/share.png";
 import video from "@/assets/icons/video.png";
 import iconDelete from "@/assets/icons/delete.png";
+import photo from "@/assets/icons/photo.png";
+import empty2 from "@/assets/icons/empty2.png";
+import placeholder2 from "@/assets/icons/placeholder2.png";
+import nocomment from "@/assets/icons/no-comment.png";
 
 export default {
   play,
@@ -42,4 +46,8 @@ export default {
   share,
   video,
   iconDelete,
+  photo,
+  empty2,
+  placeholder2,
+  nocomment,
 };

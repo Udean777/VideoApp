@@ -1,4 +1,4 @@
-import { View, Text, FlatList, RefreshControl, StyleSheet } from 'react-native'
+import { View, Text, FlatList, RefreshControl, StyleSheet, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import EmptyState from '@/components/EmptyState'
@@ -10,12 +10,20 @@ import { Ionicons } from '@expo/vector-icons'
 
 const Reels = () => {
     const [refreshing, setRefreshing] = useState(false)
-    const { data: posts, refetch } = useAppwrite(getAllPost)
+    const { data: posts, refetch, isLoading } = useAppwrite(getAllPost)
 
     const onRefresh = async () => {
         setRefreshing(true)
         await refetch()
         setRefreshing(false)
+    }
+
+    if (isLoading) {
+        return (
+            <View className="flex-1 justify-center items-center bg-primary">
+                <ActivityIndicator size="large" color="#fff" />
+            </View>
+        );
     }
 
     return (
@@ -61,28 +69,5 @@ const Reels = () => {
         </SafeAreaView>
     )
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#F5FCFF',
-    },
-    title: {
-        fontSize: 24,
-        marginBottom: 20,
-    },
-    openButton: {
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        backgroundColor: '#841584',
-        borderRadius: 5,
-    },
-    openButtonText: {
-        color: 'white',
-        fontSize: 16,
-    },
-});
 
 export default Reels

@@ -47,7 +47,7 @@ const VideoCard = ({ video: { id, title, thumbnail, video, creator: { accountId,
         <View className='items-center px-4 mb-14'>
             <View className='flex-row gap-3 items-start'>
                 <View className='justify-center items-center flex-row flex-1'>
-                    <Pressable onPress={() => user.$id == post.creator.$id ? router.navigate("Profile") : handlePress(post.creator.$id)} className='w-[46px] h-[46px] rounded-full border border-secondary justify-center items-center p-0.5'>
+                    <Pressable onPress={() => user.$id == post.creator.$id ? router.navigate("Profile") : handlePress(post.creator.$id)} className='w-[46px] h-[46px] rounded-full border-2 border-gray-600 justify-center items-center p-0.5'>
                         <Image
                             source={{ uri: avatar }}
                             className='w-full h-full rounded-full'

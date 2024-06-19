@@ -1,8 +1,8 @@
-import { View, Text, TouchableOpacity, Image, Alert, Dimensions, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Alert, Dimensions, ScrollView, ActivityIndicator } from 'react-native';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
-import { icons } from '@/constants';
+import { icons, images } from '@/constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import InfoBox from '@/components/InfoBox';
 import { StatusBar } from 'expo-status-bar';
@@ -11,6 +11,7 @@ import useAppwrite from '@/libs/useAppwrite';
 import { followUser, getFollowers, getFollowings, getUserDetails, getUserOrdinaryPosts, getUserPosts, unfollowUser } from '@/libs/appWrite';
 import PostTabsDetails from '@/components/DetailsComponents/PostTabsDetails';
 import VideoTabsDetails from '@/components/DetailsComponents/VideoTabsDetails';
+import { Ionicons } from '@expo/vector-icons';
 
 const DetailUser = () => {
     const { DetailUser } = useLocalSearchParams<{ DetailUser: any }>();
@@ -25,11 +26,11 @@ const DetailUser = () => {
     const getOrdinaryPostMemoized = useCallback(() => getUserOrdinaryPosts(DetailUser), [DetailUser]);
 
     // Appwrite API calls
-    const { data: postVideos } = useAppwrite(getUserPostsMemoized);
-    const { data: following } = useAppwrite(getFollowingsMemoized);
-    const { data: followers, setData: setFollowers } = useAppwrite(getUserFollowersMemoized);
-    const { data: user } = useAppwrite(getUserMemoized);
-    const { data: posts } = useAppwrite(getOrdinaryPostMemoized);
+    const { data: postVideos, isLoading: postVideosLoading } = useAppwrite(getUserPostsMemoized);
+    const { data: following, isLoading: followingLoading } = useAppwrite(getFollowingsMemoized);
+    const { data: followers, setData: setFollowers, isLoading: followersLoading } = useAppwrite(getUserFollowersMemoized);
+    const { data: user, isLoading: userLoading } = useAppwrite(getUserMemoized);
+    const { data: posts, isLoading: postsLoading } = useAppwrite(getOrdinaryPostMemoized);
 
     // State variables
     const [isFollowing, setIsFollowing] = useState(false);
@@ -94,48 +95,98 @@ const DetailUser = () => {
     );
 
     const Header = memo(() => (
-        <View className='w-full justify-center items-center mb-5 px-4 '>
-            <TouchableOpacity
-                className='w-full items-start mb-10'
-                onPress={() => router.back()}
-            >
-                <Image
-                    source={icons.leftArrow}
-                    resizeMode='contain'
-                    className='w-6 h-6'
-                />
-            </TouchableOpacity>
+        <View>
+            <View className='h-44'>
+                {user?.cover_photo ? (
+                    <Image
+                        source={{ uri: user?.cover_photo }}
+                        className='w-[100%] h-[100%] absolute top-0 left-0'
+                        resizeMode='cover'
+                    />
+                ) : (
+                    <Image
+                        source={icons.nocomment}
+                        className='w-[100%] h-[100%] absolute top-0 left-0 bottom-0 right-0'
+                        resizeMode='contain'
+                        tintColor={"#80C4E9"}
+                    />
+                )}
 
-            <View className='w-16 h-16 border border-secondary rounded-full justify-center items-center'>
-                <Image
-                    source={{ uri: user?.avatar }}
-                    className='w-[90%] h-[90%] rounded-full'
-                    resizeMode='cover'
-                />
+                <View className='flex-row justify-between items-center px-4 mt-2'>
+                    <TouchableOpacity
+                        onPress={() => router.back()}
+                        className='bg-primary/80 p-2 rounded-full'
+                    >
+                        <Image
+                            source={icons.leftArrow}
+                            resizeMode='contain'
+                            className='w-5 h-5'
+                            tintColor={"#fff"}
+                        />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        // onPress={onLogout}
+                        className='bg-primary/80 p-2 rounded-full items-center justify-center'
+                    >
+                        <Image
+                            source={icons.menu}
+                            resizeMode='contain'
+                            className='w-5 h-5'
+                            tintColor={"#fff"}
+                        />
+                    </TouchableOpacity>
+
+                </View>
             </View>
 
-            <View className='mt-5'>
-                <Text className='text-white text-center font-psemibold text-lg'>{user?.username}</Text>
-                <Text className='text-white text-center font-psemibold text-xs'>{user?.email}</Text>
-            </View>
+            <View className='px-4'>
+                <View className='flex-row justify-between items-center'>
+                    <View className='w-20 h-20 bg-primary border-2 border-gray-600 rounded-full justify-center items-center relative bottom-10'>
+                        <Image
+                            source={{ uri: user?.avatar }}
+                            className='w-[90%] h-[90%] rounded-full'
+                            resizeMode='cover'
+                        />
+                    </View>
 
-            <View className='mt-5 flex-row' style={{ gap: 10 }}>
-                <TouchableOpacity
-                    onPress={toggleFollow}
-                    activeOpacity={0.7}
-                    className={`${isFollowing ? "bg-transparent border-2 border-secondary" : "bg-secondary border-2 border-secondary"}
+                    <View className='flex-row items-center' style={{ gap: 10 }}>
+                        <TouchableOpacity
+                            onPress={() => router.navigate(`EditProfile`)}>
+                            <Ionicons name='chatbubble-ellipses-outline' size={30} color={"#fff"} />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={toggleFollow}
+                            activeOpacity={0.7}
+                            className={`${isFollowing ? "bg-transparent border-2 border-white" : "bg-secondary border-2 border-secondary"}
                                  rounded-xl py-2 px-10 justify-center items-center`}
-                >
-                    {isFollowing ? (
-                        <Text className={`text-secondary font-psemibold text-sm`}>Followed</Text>
-                    ) : (
-                        <Text className={`text-primary font-psemibold text-sm`}>Follow</Text>
-                    )}
-                </TouchableOpacity>
+                        >
+                            {isFollowing ? (
+                                <Text className={`text-white font-psemibold text-sm`}>Followed</Text>
+                            ) : (
+                                <Text className={`text-primary font-psemibold text-sm`}>Follow</Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
 
-                <TouchableOpacity className='bg-primary border-2 border-secondary py-2 flex-1 items-center rounded-lg'>
-                    <Text className='font-psemibold text-secondary'>Message</Text>
-                </TouchableOpacity>
+                <View className='relative bottom-5' style={{ gap: 10 }}>
+                    <Text className={`text-white font-pbold text-xl`}>{user?.username}</Text>
+                    <Text className={`text-white font-psemibold text-xs`}>{user?.email}</Text>
+
+                    {user?.bio ? (
+                        <View>
+                            <Text className={`text-white font-pregular text-xs`}>{user?.bio}</Text>
+                        </View>
+                    ) : (
+                        <View>
+                            <Text className={`text-white font-pregular text-xs`}>You don't have bio, create it now!</Text>
+                        </View>
+                    )}
+                </View>
+
+
             </View>
 
             <View
@@ -163,20 +214,28 @@ const DetailUser = () => {
         </View>
     ))
 
+    const isLoading = useMemo(() => postVideosLoading || followingLoading || followersLoading || userLoading || postsLoading, [postVideosLoading, followingLoading, followersLoading, userLoading, postsLoading]);
+
     return (
         <SafeAreaView className='bg-primary h-full'>
-            <ScrollView className='flex-grow' nestedScrollEnabled={true} showsVerticalScrollIndicator={false}>
-                <Header />
+            {isLoading ? (
+                <View className='flex-1 justify-center items-center'>
+                    <ActivityIndicator size="large" color="#fff" />
+                </View>
+            ) : (
+                <ScrollView className='flex-grow' nestedScrollEnabled={true} showsVerticalScrollIndicator={false}>
+                    <Header />
 
-                <TabView
-                    navigationState={{ index, routes }}
-                    renderScene={renderSceneMemoized}
-                    onIndexChange={setIndex}
-                    initialLayout={{ width: layout.width }}
-                    renderTabBar={renderTabBar}
-                    style={{ height: layout.height }}
-                />
-            </ScrollView>
+                    <TabView
+                        navigationState={{ index, routes }}
+                        renderScene={renderSceneMemoized}
+                        onIndexChange={setIndex}
+                        initialLayout={{ width: layout.width }}
+                        renderTabBar={renderTabBar}
+                        style={{ height: layout.height }}
+                    />
+                </ScrollView>
+            )}
             <StatusBar backgroundColor='#161622' style='light' />
         </SafeAreaView>
     );

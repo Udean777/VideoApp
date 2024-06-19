@@ -1,21 +1,18 @@
-import { View, Text, FlatList, RefreshControl, TouchableOpacity, StyleSheet } from 'react-native'
-import React, { useCallback, useState } from 'react'
+import { View, Text, FlatList, RefreshControl, ActivityIndicator } from 'react-native'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import SearchInput from '@/components/SearchInput'
 import EmptyState from '@/components/EmptyState'
-import { getAllOrdinaryPost, getAllPost } from '@/libs/appWrite'
+import { getAllOrdinaryPost } from '@/libs/appWrite'
 import useAppwrite from '@/libs/useAppwrite'
-import VideoCard from '@/components/VideoCard'
 import { StatusBar } from 'expo-status-bar'
 import Story from '@/components/Story'
 import { Ionicons } from '@expo/vector-icons'
-import CustomModal from '@/components/CustomModal'
 import PostCard from '@/components/PostCard'
 
 const Home = () => {
     const [refreshing, setRefreshing] = useState(false)
-    const { data: posts, refetch } = useAppwrite(getAllOrdinaryPost)
-    const [modalVisible, setModalVisible] = useState(false)
+    const { data: posts, refetch, isLoading } = useAppwrite(getAllOrdinaryPost)
 
     const onRefresh = async () => {
         setRefreshing(true)
@@ -23,15 +20,13 @@ const Home = () => {
         setRefreshing(false)
     }
 
-    // console.log(JSON.stringify(posts, null, 2))
-
-    // const showModal = useCallback(() => {
-    //     setModalVisible(true);
-    // }, []);
-
-    // const hideModal = useCallback(() => {
-    //     setModalVisible(false);
-    // }, []);
+    if (isLoading) {
+        return (
+            <View className="flex-1 justify-center items-center bg-primary">
+                <ActivityIndicator size="large" color="#fff" />
+            </View>
+        );
+    }
 
     return (
         <SafeAreaView className='bg-primary h-full'>
@@ -49,13 +44,6 @@ const Home = () => {
                                     SioBlues
                                 </Text>
                             </View>
-
-                            {/* <TouchableOpacity
-                                style={styles.openButton}
-                                onPress={showModal}
-                            >
-                                <Text style={styles.openButtonText}>Show Modal</Text>
-                            </TouchableOpacity> */}
 
                             <View style={{ gap: 10 }} className='flex-row'>
                                 <View>
@@ -83,37 +71,8 @@ const Home = () => {
             />
 
             <StatusBar backgroundColor='#161622' style='light' />
-
-            {/* <CustomModal
-                onClose={hideModal}
-                visible={modalVisible}
-            /> */}
-
         </SafeAreaView>
     )
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#F5FCFF',
-    },
-    title: {
-        fontSize: 24,
-        marginBottom: 20,
-    },
-    openButton: {
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        backgroundColor: '#841584',
-        borderRadius: 5,
-    },
-    openButtonText: {
-        color: 'white',
-        fontSize: 16,
-    },
-});
 
 export default Home

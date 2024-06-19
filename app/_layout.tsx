@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import GlobalProvider, { useGlobalContext } from '@/context/GlobalProvider';
 import { ActivityIndicator, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -50,8 +51,8 @@ const InitialLayout = () => {
 
     if (!fontsLoaded || isLoading) {
         return (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: "center" }}>
-                <ActivityIndicator size={"large"} color={"#000"} />
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: "center" }} className='bg-primary'>
+                <ActivityIndicator size={"large"} color={"#fff"} />
             </View>
         );
     }
@@ -72,7 +73,9 @@ export default function RootLayout() {
     return (
         <GlobalProvider>
             <SafeAreaView style={{ flex: 1 }}>
-                <InitialLayout />
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                    <InitialLayout />
+                </GestureHandlerRootView>
             </SafeAreaView>
         </GlobalProvider>
     );
