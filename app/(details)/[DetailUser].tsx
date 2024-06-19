@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity, Image, Alert, Dimensions, ScrollView, Act
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
-import { icons, images } from '@/constants';
+import { icons } from '@/constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import InfoBox from '@/components/InfoBox';
 import { StatusBar } from 'expo-status-bar';
@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 const DetailUser = () => {
     const { DetailUser } = useLocalSearchParams<{ DetailUser: any }>();
-    const { user: currentUser } = useGlobalContext();
+    const { user: currentUser, followState, updateFollowState } = useGlobalContext();
     const layout = Dimensions.get('window');
 
     // Memoized functions
@@ -33,7 +33,7 @@ const DetailUser = () => {
     const { data: posts, isLoading: postsLoading } = useAppwrite(getOrdinaryPostMemoized);
 
     // State variables
-    const [isFollowing, setIsFollowing] = useState(false);
+    const [isFollowLoading, setIsFollowLoading] = useState(false);
     const [index, setIndex] = useState(0);
 
     // Memoized components
@@ -41,35 +41,49 @@ const DetailUser = () => {
     const VideoTabsDetailsMemoized = memo(VideoTabsDetails);
 
     // Check if following
-    const checkIfFollowingMemoized = useCallback(() => {
-        const isFollowingUser = followers.some((f: any) => f === currentUser?.$id);
-        setIsFollowing(isFollowingUser);
-    }, [followers, currentUser?.$id]);
-
     useEffect(() => {
-        checkIfFollowingMemoized();
-    }, [followers, checkIfFollowingMemoized]);
+        const checkFollowStatus = async () => {
+            try {
+                // Fetch followers and following users from the server
+                const followers = await getFollowers(DetailUser);
+                const isFollowingUser = followers.includes(currentUser?.$id);
+                updateFollowState(DetailUser, isFollowingUser);
+            } catch (error) {
+                console.error('Error fetching follow status:', error);
+            }
+        };
+
+        checkFollowStatus();
+    }, [DetailUser, currentUser?.$id, updateFollowState]);
 
     // Toggle follow
     const toggleFollow = useCallback(async () => {
-        if (isFollowing) {
-            try {
+        if (isFollowLoading) return; // Prevent multiple clicks
+
+        setIsFollowLoading(true); // Start loading
+
+        const isFollowing = followState[DetailUser] || false;
+        try {
+            if (isFollowing) {
                 await unfollowUser(currentUser?.$id, DetailUser);
                 setFollowers((prevFollowers: any) => prevFollowers.filter((f: any) => f !== currentUser?.$id));
-                setIsFollowing(false);
-            } catch (error: any) {
-                Alert.alert('Error', error.message);
-            }
-        } else {
-            try {
+                updateFollowState(DetailUser, false);
+            } else {
                 await followUser(currentUser?.$id, DetailUser);
                 setFollowers((prevFollowers: any) => [...prevFollowers, currentUser?.$id]);
-                setIsFollowing(true);
-            } catch (error: any) {
+                updateFollowState(DetailUser, true);
+            }
+        } catch (error: any) {
+            if (error.message.includes("You are not following this user")) {
+                setFollowers((prevFollowers: any) => prevFollowers.filter((f: any) => f !== currentUser?.$id));
+                updateFollowState(DetailUser, false);
+            } else {
                 Alert.alert('Error', error.message);
             }
+        } finally {
+            setIsFollowLoading(false); // End loading
         }
-    }, [isFollowing, currentUser?.$id, DetailUser, setFollowers]);
+    }, [followState, currentUser?.$id, DetailUser, setFollowers, updateFollowState, isFollowLoading]);
 
     // Routes and render scene
     const routes = useMemo(() => [
@@ -126,7 +140,6 @@ const DetailUser = () => {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        // onPress={onLogout}
                         className='bg-primary/80 p-2 rounded-full items-center justify-center'
                     >
                         <Image
@@ -136,7 +149,6 @@ const DetailUser = () => {
                             tintColor={"#fff"}
                         />
                     </TouchableOpacity>
-
                 </View>
             </View>
 
@@ -159,10 +171,13 @@ const DetailUser = () => {
                         <TouchableOpacity
                             onPress={toggleFollow}
                             activeOpacity={0.7}
-                            className={`${isFollowing ? "bg-transparent border-2 border-white" : "bg-secondary border-2 border-secondary"}
-                                 rounded-xl py-2 px-10 justify-center items-center`}
+                            className={`${followState[DetailUser] ? "bg-transparent border-2 border-white" : "bg-secondary border-2 border-secondary"}
+         rounded-xl py-2 px-10 justify-center items-center`}
+                            disabled={isFollowLoading}
                         >
-                            {isFollowing ? (
+                            {isFollowLoading ? (
+                                <ActivityIndicator size="small" color="#fff" />
+                            ) : followState[DetailUser] ? (
                                 <Text className={`text-white font-psemibold text-sm`}>Followed</Text>
                             ) : (
                                 <Text className={`text-primary font-psemibold text-sm`}>Follow</Text>
@@ -185,8 +200,6 @@ const DetailUser = () => {
                         </View>
                     )}
                 </View>
-
-
             </View>
 
             <View
@@ -212,7 +225,7 @@ const DetailUser = () => {
                 />
             </View>
         </View>
-    ))
+    ));
 
     const isLoading = useMemo(() => postVideosLoading || followingLoading || followersLoading || userLoading || postsLoading, [postVideosLoading, followingLoading, followersLoading, userLoading, postsLoading]);
 

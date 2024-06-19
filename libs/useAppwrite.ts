@@ -4,6 +4,7 @@ import { Alert } from "react-native"
 const useAppwrite = (fn: any) => {
     const [data, setData] = useState<any>([])
     const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState("")
 
     const fetchData = async () => {
         setIsLoading(true)
@@ -14,6 +15,7 @@ const useAppwrite = (fn: any) => {
             setData(res)
         } catch (error: any) {
             Alert.alert("Error", error.message)
+            setError(error.message)
         } finally {
             setIsLoading(false)
         }
@@ -25,7 +27,7 @@ const useAppwrite = (fn: any) => {
 
     const refetch = () => fetchData()
 
-    return { data, isLoading, refetch, setData }
+    return { data, isLoading, refetch, setData, error }
 }
 
 export default useAppwrite

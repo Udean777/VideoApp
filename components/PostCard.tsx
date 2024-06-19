@@ -1,7 +1,7 @@
 import { View, Text, Image, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { icons } from '../constants'
-import { checkIfLiked, deletePost, getVideoLikes, likeVideo, unlikeVideo } from '@/libs/appWrite'
+import { checkIfLiked, getVideoLikes, likeVideo, unlikeVideo } from '@/libs/appWrite'
 import { useGlobalContext } from '../context/GlobalProvider'
 import useAppwrite from '@/libs/useAppwrite'
 import { router } from 'expo-router'
@@ -34,14 +34,9 @@ const PostCard = ({ posts: { $id, title, photo, $collectionId, creator } = {} }:
     }, [$id, user?.$id]);
 
     const handlePress = (id: string) => {
-        console.log('Navigating to user detail with accountId:', id);
+        // console.log('Navigating to user detail with accountId:', id);
         router.navigate(`(details)/${id}`);
     };
-
-    const handleDelete = useCallback(async () => {
-        await deletePost($id, $collectionId);
-        // navigate back to previous screen or refresh the list
-    }, [$id, $collectionId]);
 
     if (!creator) {
         return (
@@ -51,10 +46,8 @@ const PostCard = ({ posts: { $id, title, photo, $collectionId, creator } = {} }:
         )
     }
 
-    // console.log(creator.$id === user?.$id)
-
     return (
-        <View className='items-center px-4 mb-14'>
+        <View className='items-center px-4 py-5'>
             <View className='flex-row gap-3 items-start'>
                 <View className='justify-center items-center flex-row flex-1'>
                     <Pressable onPress={() => creator.$id === user?.$id ? router.navigate("Profile") : handlePress(creator.$id)} className='w-[46px] h-[46px] rounded-full border-2 border-gray-600 justify-center items-center p-0.5'>
@@ -111,7 +104,7 @@ const PostCard = ({ posts: { $id, title, photo, $collectionId, creator } = {} }:
                 <TouchableOpacity
                     activeOpacity={0.7}
                     className='pt-2'
-                // onPress={handleLike}
+                // onPress={handleBottomSheetOpen}
                 >
                     <Ionicons name='chatbubble-outline' size={30} color={"#fff"} />
                 </TouchableOpacity>
@@ -135,6 +128,56 @@ const PostCard = ({ posts: { $id, title, photo, $collectionId, creator } = {} }:
                     <Text className='font-pbold text-white text-sm'>{username}</Text>{"  "}{title}
                 </Text>
             </View>
+
+            {/* <BottomSheet
+                ref={bottomCommentRef}
+                snapPoints={snapPoints}
+                backdropComponent={(backdropProps) => (
+                    <BottomSheetBackdrop
+                        {...backdropProps}
+                        enableTouchThrough={true}
+                    />
+                )}
+                enablePanDownToClose={true}
+                backgroundStyle={{ backgroundColor: "#161622" }}
+                handleIndicatorStyle={{ backgroundColor: "#fff" }}
+            >
+                <BottomSheetView className='h-full'>
+                    <View className="h-full">
+                        <ScrollView className="px-4 pt-6">
+                            {comments?.map((c: any) => (
+                                <View key={c.$id} className="flex-row items-center mb-4">
+                                    <Image
+                                        source={{ uri: c.creator.avatar }}
+                                        className="w-10 h-10 rounded-full mr-4"
+                                    />
+                                    <View>
+                                        <Text className="text-white font-pbold text-base">{c.creator.username || "unknown"}</Text>
+                                        <Text className="text-white font-pregular text-sm">{c.content || 0}</Text>
+                                    </View>
+                                </View>
+                            ))}
+                        </ScrollView>
+                        <View className="bg-gray-800 p-4">
+                            <View className="flex-row items-center mb-2">
+                                <Image
+                                    source={{ uri: user?.avatar }}
+                                    className="w-10 h-10 rounded-full mr-4"
+                                />
+                                <TextInput
+                                    value={comment}
+                                    onChangeText={setComment}
+                                    placeholder="Add a comment..."
+                                    className="flex-1 bg-transparent text-white"
+                                />
+                            </View>
+                            <TouchableOpacity onPress={handleSendComment} className="w-full">
+                                <Text className="text-center text-gray-400">Send</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </BottomSheetView>
+            </BottomSheet> */}
         </View>
     )
 }

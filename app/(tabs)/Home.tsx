@@ -56,7 +56,7 @@ const Home = () => {
                             </View>
                         </View>
 
-                        <Story />
+                        {/* <Story /> */}
 
                         <SearchInput />
                     </View>

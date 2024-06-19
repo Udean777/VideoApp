@@ -1,8 +1,7 @@
 import { View, Text, FlatList, RefreshControl, Image } from 'react-native'
-import React, { useCallback, useState } from 'react'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PostCard from '../PostCard';
-import EmptyState from '../EmptyState';
 import useAppwrite from '@/libs/useAppwrite';
 import { getFollowers, getFollowings, getUserOrdinaryPosts } from '@/libs/appWrite';
 import { icons } from '@/constants';

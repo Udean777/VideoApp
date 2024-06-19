@@ -11,7 +11,7 @@ export const config = {
     likesCollectionId: "666bd6f1000b51feb223",
     followsCollectionId: "666c4a8e002680e2571b",
     postsCollectionId: "666ef58b003aefb99324",
-    storiesCollectionId: "667273070025885fe4af"
+    commentsCollectionId: "667288fe002f2ac74b7a"
 }
 
 const {
@@ -25,7 +25,7 @@ const {
     likesCollectionId,
     followsCollectionId,
     postsCollectionId,
-    storiesCollectionId
+    commentsCollectionId
 } = config
 
 // Init your React Native SDK
@@ -265,47 +265,83 @@ export const uploadFile = async (file: any, type: string) => {
     }
 }
 
-export const uploadStory = async (file: any, userId: string, caption: string) => {
-    if (!file) return
+// export const uploadStory = async (file: any, userId: string, caption: string) => {
+//     if (!file) return
 
-    const asset = {
-        name: file.fileName,
-        type: file.mimeType,
-        size: file.fileSize,
-        uri: file.uri
-    }
+//     const asset = {
+//         name: file.fileName,
+//         type: file.mimeType,
+//         size: file.fileSize,
+//         uri: file.uri
+//     }
 
+//     try {
+//         const uploadedFile = await storage.createFile(
+//             storageId,
+//             ID.unique(),
+//             asset
+//         )
+
+//         const fileUrl = await getFilePreview(uploadedFile.$id, asset.type.includes('video') ? 'video' : 'image');
+
+//         if (!fileUrl) throw new Error("Failed to get file url")
+
+//         const newStory = await databases.createDocument(
+//             databaseId,
+//             storiesCollectionId,
+//             ID.unique(),
+//             {
+//                 creator: userId,
+//                 fileId: uploadedFile.$id,
+//                 fileUrl: fileUrl.href,
+//                 createdAt: new Date().toISOString(),
+//                 type: asset.type.includes("video") ? "video" : "image",
+//                 caption: caption
+//             }
+//         )
+
+//         return newStory
+//     } catch (error: any) {
+//         console.error("Error uploading story", error)
+//         throw new Error(error)
+//     }
+// }
+
+export const createComment = async (postId: string, content: string, userId: any) => {
     try {
-        const uploadedFile = await storage.createFile(
-            storageId,
-            ID.unique(),
-            asset
-        )
-
-        const fileUrl = await getFilePreview(uploadedFile.$id, asset.type.includes('video') ? 'video' : 'image');
-
-        if (!fileUrl) throw new Error("Failed to get file url")
-
-        const newStory = await databases.createDocument(
+        const newComments = await databases.createDocument(
             databaseId,
-            storiesCollectionId,
+            commentsCollectionId,
             ID.unique(),
             {
+                postId: postId,
                 creator: userId,
-                fileId: uploadedFile.$id,
-                fileUrl: fileUrl.href,
+                content,
                 createdAt: new Date().toISOString(),
-                type: asset.type.includes("video") ? "video" : "image",
-                caption: caption
+                updatedAt: new Date().toISOString()
             }
         )
 
-        return newStory
+        return newComments
     } catch (error: any) {
-        console.error("Error uploading story", error)
         throw new Error(error)
     }
 }
+
+export const getComments = async (postId: string) => {
+    try {
+        const comments = await databases.listDocuments(
+            databaseId,
+            commentsCollectionId,
+            [Query.equal("postId", postId)]
+        );
+
+        return comments;
+    } catch (error: any) {
+        console.error("Error getting comments", error);
+        throw new Error(error);
+    }
+};
 
 // Buat post
 export const createVideo = async (form: any) => {

@@ -22,12 +22,6 @@ const Profile = () => {
     const [loading, setLoading] = useState(false)
     const bottomSheetRef = useRef<BottomSheetMethods>(null)
 
-    // console.log(coverPhoto)
-
-    // const handleBottomSheetOpen = () => {
-    //     bottomSheetRef.current?.expand()
-    // }
-
     const snapPoints = useMemo(() => ["1%", "50%"], [])
 
     const pickImage = async () => {
@@ -148,7 +142,7 @@ const Profile = () => {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        // onPress={onLogout}
+                        onPress={onLogout}
                         className='bg-primary/80 p-2 rounded-full items-center justify-center'
                     >
                         <Image

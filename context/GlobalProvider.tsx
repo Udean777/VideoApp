@@ -13,6 +13,7 @@ const GlobalProvider = ({ children }: GlobalProviderProps) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [user, setUser] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [followState, setFollowState] = useState({})
 
     useEffect(() => {
         getCurrentUser()
@@ -31,6 +32,13 @@ const GlobalProvider = ({ children }: GlobalProviderProps) => {
             })
     }, [])
 
+    const updateFollowState = (userId: string, isFollowing: boolean) => {
+        setFollowState((prevState) => ({
+            ...prevState,
+            [userId]: isFollowing
+        }))
+    }
+
     return (
         <GlobalContext.Provider value={{
             isLoggedIn,
@@ -38,6 +46,8 @@ const GlobalProvider = ({ children }: GlobalProviderProps) => {
             user,
             setUser,
             isLoading,
+            followState,
+            updateFollowState
         }}>
             {children}
         </GlobalContext.Provider>
