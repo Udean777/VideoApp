@@ -54,10 +54,10 @@ const DetailUser = () => {
         };
 
         checkFollowStatus();
-    }, [DetailUser, currentUser?.$id, updateFollowState]);
+    }, [DetailUser, currentUser?.$id]);
 
     // Toggle follow
-    const toggleFollow = useCallback(async () => {
+    const toggleFollow = async () => {
         if (isFollowLoading) return; // Prevent multiple clicks
 
         setIsFollowLoading(true); // Start loading
@@ -83,7 +83,7 @@ const DetailUser = () => {
         } finally {
             setIsFollowLoading(false); // End loading
         }
-    }, [followState, currentUser?.$id, DetailUser, setFollowers, updateFollowState, isFollowLoading]);
+    }
 
     // Routes and render scene
     const routes = useMemo(() => [
@@ -98,6 +98,8 @@ const DetailUser = () => {
         }),
         [DetailUser]
     );
+
+    // console.log(followState)
 
     // Render tab bar
     const renderTabBar = (props: any) => (
@@ -164,7 +166,8 @@ const DetailUser = () => {
 
                     <View className='flex-row items-center' style={{ gap: 10 }}>
                         <TouchableOpacity
-                            onPress={() => router.navigate(`EditProfile`)}>
+                        // onPress={() => router.navigate(`EditProfile`)}
+                        >
                             <Ionicons name='chatbubble-ellipses-outline' size={30} color={"#fff"} />
                         </TouchableOpacity>
 

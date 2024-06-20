@@ -13,13 +13,15 @@ import { fetchFollowing, followUser, getAllUsers, unfollowUser } from '@/libs/ap
 import { icons } from '@/constants';
 import { StatusBar } from 'expo-status-bar';
 import { useGlobalContext } from '@/context/GlobalProvider';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 
 const Friends = () => {
     const { data: users, isLoading: usersLoading } = useAppwrite(getAllUsers);
     const { user, followState, updateFollowState } = useGlobalContext();
     const [following, setFollowing] = useState<any>({});
     const [refreshing, setRefreshing] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
+    const [isProcessing, setIsProcessing] = useState<any>({});
 
     const loadFollowing = useCallback(async () => {
         if (user?.$id && users) {
@@ -29,18 +31,51 @@ const Friends = () => {
     }, [user?.$id, users]);
 
     useEffect(() => {
-        loadFollowing();
-    }, [loadFollowing]);
+        if (isFocused) {
+            loadFollowing();
+        }
+    }, [isFocused, loadFollowing]);
 
-    const toggleFollow = useCallback(async (userId: any, followedUserId: any) => {
-        const isFollowing = following[followedUserId];
+    useFocusEffect(
+        useCallback(() => {
+            setIsFocused(true);
+            return () => setIsFocused(false);
+        }, [])
+    );
+
+    useEffect(() => {
+        if (Object.keys(following).length > 0) {
+            // Update the global follow state without causing infinite loop
+            Object.keys(following).forEach((userId) => {
+                if (followState[userId] !== following[userId]) {
+                    updateFollowState(userId, following[userId]);
+                }
+            });
+        }
+    }, [following, followState, updateFollowState]);
+
+    const debounce = (func: any, delay: any) => {
+        let timeoutId: any;
+        return function (...args: any) {
+            if (timeoutId) clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                func(...args);
+            }, delay);
+        };
+    };
+
+    const toggleFollow = debounce(async (userId: any, followedUserId: any) => {
+        if (isProcessing[followedUserId]) return; // Prevent multiple rapid calls
+
+        setIsProcessing((prev: any) => ({ ...prev, [followedUserId]: true }));
+        const isFollowing = followState[followedUserId];
 
         // Optimistically update the following state
         setFollowing((prevFollowing: any) => ({
             ...prevFollowing,
             [followedUserId]: !isFollowing,
         }));
-        updateFollowState(followedUserId, !isFollowing)
+        updateFollowState(followedUserId, !isFollowing);
 
         try {
             if (isFollowing) {
@@ -55,9 +90,11 @@ const Friends = () => {
                 ...prevFollowing,
                 [followedUserId]: isFollowing,
             }));
-            updateFollowState(followedUserId, isFollowing)
+            updateFollowState(followedUserId, isFollowing);
+        } finally {
+            setIsProcessing((prev: any) => ({ ...prev, [followedUserId]: false }));
         }
-    }, [following, updateFollowState]);
+    }, 300);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
@@ -71,7 +108,7 @@ const Friends = () => {
     const renderItem = useCallback(
         ({ item }: any) => (
             <TouchableOpacity
-                onPress={() => router.push(`(details)/${item?.$id}`)}
+                onPress={() => router.navigate(`(details)/${item?.$id}`)}
                 className='w-full mb-12'
             >
                 <View className='flex-row gap-2 items-center'>
